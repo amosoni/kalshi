@@ -1,3 +1,109 @@
+# AI Video Editing Platform
+
+## Project Overview
+
+This project is an AI-powered video editing platform for global creators, supporting background removal (matting), background replacement, video editing, auto subtitles, and AI voiceover. It is designed for content creators, e-commerce, education, and short video scenarios. The platform is multi-language ready (default: English) and extensible for future AI video features.
+
+---
+
+## Main Features
+- Video background removal (matting, powered by RVM and similar APIs)
+- One-click background replacement (custom image/video/solid color)
+- Video editing (cut, merge, transitions, etc.)
+- Auto subtitles (speech-to-text)
+- AI voiceover (multi-language TTS)
+- Multi-language UI (default: English)
+- Batch processing & workflow automation
+- User management & permissions
+
+---
+
+## Tech Stack
+- Frontend: Next.js + React + Tailwind CSS
+- Backend: Next.js API Routes / Node.js / Python (optional)
+- Video Processing: FFmpeg, Remotion
+- AI: Replicate API (RVM), Whisper API, TTS APIs (ElevenLabs, Azure, etc.)
+- Database: Supabase / PostgreSQL
+- i18n: react-i18next
+- Deployment: Vercel / AWS / others
+
+---
+
+## Quick Start
+
+1. Clone the repo
+   `git clone <repo-url>`
+2. Install dependencies
+   `npm install`
+3. Configure environment variables
+   `.env.local`:
+   ```
+   REPLICATE_API_TOKEN=xxx
+   WHISPER_API_KEY=xxx
+   TTS_API_KEY=xxx
+   SUPABASE_URL=xxx
+   SUPABASE_KEY=xxx
+   ```
+4. Start development server
+   `npm run dev`
+5. Visit `http://localhost:3000`
+
+---
+
+## Directory Structure
+
+```
+/app                # Next.js App Router
+  /api              # Backend API routes (matting, subtitles, TTS, etc.)
+  /components       # UI components
+  /i18n             # i18n config
+  /utils            # Utilities (FFmpeg, API wrappers)
+  /styles           # Styles
+  /public           # Static assets
+  /pages            # (Optional) legacy pages
+/scripts            # Batch/automation scripts
+/README.md
+/cursorrules.md     # Team development rules
+/package.json
+/next.config.js
+/tailwind.config.js
+```
+
+---
+
+## Development Steps
+
+1. Requirements & UI/UX prototyping
+2. Project setup (Next.js, Tailwind, Supabase)
+3. Integrate Replicate (RVM) for matting
+4. Integrate TTS & Whisper APIs for voiceover/subtitles
+5. Frontend: upload, preview, settings, progress UI, i18n
+6. Backend: video processing pipeline (matting → background → edit → subtitles → TTS)
+7. Batch processing & workflow automation
+8. Testing & optimization
+9. Deployment (Vercel or custom server)
+10. User feedback & iteration
+
+---
+
+## Future Roadmap
+- AI video stylization (Ghibli, sketch, etc.)
+- AI avatar/digital human video generation
+- One-click multi-platform adaptation (TikTok, YouTube, Instagram, etc.)
+- Smart editing & summarization
+- Team collaboration & enterprise features
+- Mobile app / mini-program support
+- Self-hosted AI models to reduce cost
+- Content moderation & compliance
+- Community & template marketplace
+
+---
+
+## License
+MIT
+
+---
+
 # Boilerplate and Starter for Next.js 15+, Tailwind CSS 4, and TypeScript.
 
 <p align="center">

@@ -1,0 +1,91 @@
+export default function FeaturesSection() {
+  const features = [
+    {
+      icon: (
+        <svg width="37" height="37" viewBox="0 0 37 37" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M30.5801 8.30514H27.9926C28.6113 7.85514 29.1176 7.34889 29.3426 6.73014C29.6801 5.88639 29.6801 4.48014 27.9363 2.84889C26.0801 1.04889 24.3926 1.04889 23.3238 1.33014C20.9051 1.94889 19.2738 4.76139 18.3738 6.78639C17.4738 4.76139 15.8426 2.00514 13.4238 1.33014C12.3551 1.04889 10.6676 1.10514 8.81133 2.84889C7.06758 4.53639 7.12383 5.88639 7.40508 6.73014C7.63008 7.34889 8.13633 7.85514 8.75508 8.30514H5.71758C4.08633 8.30514 2.73633 9.65514 2.73633 11.2864V14.9989C2.73633 16.5739 4.03008 17.8676 5.60508 17.9239V31.6489C5.60508 33.5614 7.18008 35.1926 9.14883 35.1926H27.5426C29.4551 35.1926 31.0863 33.6176 31.0863 31.6489V17.8676C32.4926 17.6426 33.5613 16.4051 33.5613 14.9426V11.2301C33.5613 9.59889 32.2113 8.30514 30.5801 8.30514Z" fill="white" />
+        </svg>
+      ),
+      title: 'AI Background Removal',
+      description: 'Upload your video and let AI automatically remove the background. No green screen, no manual work. Advanced machine learning ensures precise edge detection.',
+      link: 'Try Now',
+    },
+    {
+      icon: (
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M30.5998 1.01245H5.39981C2.98105 1.01245 0.956055 2.9812 0.956055 5.4562V30.6562C0.956055 33.075 2.9248 35.0437 5.39981 35.0437H30.5998C33.0186 35.0437 34.9873 33.075 34.9873 30.6562V5.39995C34.9873 2.9812 33.0186 1.01245 30.5998 1.01245Z" fill="white" />
+        </svg>
+      ),
+      title: 'Multiple Background Colors',
+      description: 'Easily switch to white, green, black, blue, pink, or custom colors. Supports various preset backgrounds for different scenarios.',
+      link: 'View Colors',
+    },
+    {
+      icon: (
+        <svg width="37" height="37" viewBox="0 0 37 37" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M33.5613 21.4677L31.3675 20.1177C30.805 19.7239 30.0175 19.9489 29.6238 20.5114C29.23 21.1302 29.455 21.8614 30.0175 22.2552L31.48 23.2114L18.1488 31.5927L4.76127 23.2114L6.22377 22.2552C6.84252 21.8614 7.01127 21.0739 6.61752 20.5114C6.22377 19.8927 5.43627 19.7239 4.87377 20.1177L2.68002 21.4677C2.11752 21.8614 1.72377 22.4802 1.72377 23.1552C1.72377 23.8302 2.06127 24.5052 2.68002 24.8427L17.08 33.8989C17.4175 34.1239 17.755 34.1802 18.1488 34.1802C18.5425 34.1802 18.88 34.0677 19.2175 33.8989L33.5613 24.8989C34.1238 24.5052 34.5175 23.8864 34.5175 23.2114C34.5175 22.5364 34.18 21.8614 33.5613 21.4677Z" fill="white" />
+        </svg>
+      ),
+      title: 'Supports Multiple Formats',
+      description: 'Supports MP4, MOV, AVI and other mainstream video formats. For best results, upload high-definition videos.',
+      link: 'View Formats',
+    },
+    {
+      icon: (
+        <svg width="37" height="37" viewBox="0 0 37 37" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.355 2.0614H5.21129C3.29879 2.0614 1.72379 3.6364 1.72379 5.5489V12.6927C1.72379 14.6052 3.29879 16.1802 5.21129 16.1802H12.355C14.2675 16.1802 15.8425 14.6052 15.8425 12.6927V5.60515C15.8988 3.6364 14.3238 2.0614 12.355 2.0614Z" fill="white" />
+        </svg>
+      ),
+      title: 'Fast Large File Processing',
+      description: 'Supports large file uploads, results in seconds, preview and download with no barriers. Free users: 3 times per day, up to 30 seconds per video.',
+      link: 'View Limits',
+    },
+  ];
+
+  return (
+    <section id="features" className="pb-8 pt-20 bg-white dark:bg-gray-900 lg:pb-[70px] lg:pt-[120px]">
+      <div className="container px-4 mx-auto">
+        <div className="flex flex-wrap -mx-4">
+          <div className="w-full px-4">
+            <div className="mx-auto mb-12 max-w-[485px] text-center lg:mb-[70px]">
+              <span className="block mb-2 text-lg font-semibold text-blue-600">
+                Key Features
+              </span>
+              <h2 className="mb-3 text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl md:text-[40px] md:leading-[1.2]">
+                Powerful AI Video Background Removal
+              </h2>
+              <p className="text-base text-gray-600 dark:text-gray-300">
+                Powered by advanced AI technology, we provide professional-grade video background removal services. Simple, easy to use, and outstanding results.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap -mx-4">
+          {features.map(feature => (
+            <div key={feature.title} className="w-full px-4 md:w-1/2 lg:w-1/4">
+              <div className="mb-12 group">
+                <div className="relative z-10 mb-10 flex h-[70px] w-[70px] items-center justify-center rounded-[14px] bg-gradient-to-br from-blue-600 to-purple-600">
+                  <span className="absolute left-0 top-0 -z-1 mb-8 flex h-[70px] w-[70px] rotate-[25deg] items-center justify-center rounded-[14px] bg-blue-600/20 duration-300 group-hover:rotate-45"></span>
+                  {feature.icon}
+                </div>
+                <h4 className="mb-3 text-xl font-bold text-gray-900 dark:text-white">
+                  {feature.title}
+                </h4>
+                <p className="mb-8 text-gray-600 dark:text-gray-300 lg:mb-9">
+                  {feature.description}
+                </p>
+                <a
+                  href="#demo"
+                  className="text-base font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  {feature.link}
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
