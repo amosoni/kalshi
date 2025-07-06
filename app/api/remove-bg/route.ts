@@ -3,6 +3,7 @@ import { Buffer } from 'node:buffer';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { getAuth } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import fetchOrig from 'node-fetch';
@@ -26,6 +27,10 @@ const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
 // 所有 var 声明已移到函数顶部或改为 let/const
 
 export async function POST(req: NextRequest) {
+  const { userId } = getAuth(req);
+  if (!userId) {
+    return new Response(JSON.stringify({ error: 'Not authenticated' }), { status: 401 });
+  }
   try {
     // 0. 获取IP和日期
     const ip = req.headers.get('x-forwarded-for') || 'unknown';
@@ -74,6 +79,22 @@ export async function POST(req: NextRequest) {
     usage.duration += durationSec;
     usageMap.set(ip, usage);
 
+    // ====== 积分校验 ======
+    // 查询当前用户积分
+    const { data: pointsData, error: pointsError } = await supabase
+      .from('points')
+      .select('balance')
+      .eq('user_id', userId)
+      .single();
+    if (pointsError) {
+      return new Response(JSON.stringify({ error: 'Failed to fetch points' }), { status: 500 });
+    }
+    const currentBalance = pointsData?.balance || 0;
+    const cost = 1; // 每次消耗1积分，可根据实际调整
+    if (currentBalance < cost) {
+      return new Response(JSON.stringify({ error: 'Insufficient points', currentBalance, requiredAmount: cost }), { status: 403 });
+    }
+
     // 2. 上传到 Supabase Storage
     const { error: uploadError } = await supabase.storage
       .from(process.env.SUPABASE_STORAGE_BUCKET!)
@@ -121,6 +142,14 @@ export async function POST(req: NextRequest) {
     }
 
     if (result.status === 'succeeded') {
+      // 扣除积分
+      const { error: updateError } = await supabase
+        .from('points')
+        .update({ balance: currentBalance - cost })
+        .eq('user_id', userId);
+      if (updateError) {
+        return new Response(JSON.stringify({ error: 'Failed to deduct points' }), { status: 500 });
+      }
       return new Response(JSON.stringify({ resultUrl: result.output }), { status: 200 });
     } else {
       console.error('AI处理失败:', result);

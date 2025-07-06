@@ -1,5 +1,8 @@
 'use client';
-import { useRef, useState } from 'react';
+
+import { useClerk } from '@clerk/nextjs';
+import { useState } from 'react';
+import { useUser } from '../hooks/useUser';
 
 const COLORS = [
   { name: 'White', value: '#FFFFFF' },
@@ -10,83 +13,149 @@ const COLORS = [
   { name: 'Custom', value: '' },
 ];
 
-export default function UploadAndRemoveBg({ title: _title = 'AI Video Background Removal Demo', glass: _glass = false }: { title?: string; glass?: boolean }) {
-  const [, setVideo] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [resultUrl, setResultUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+type UploadAndRemoveBgProps = {
+  title?: string;
+  glass?: boolean;
+};
+
+export default function UploadAndRemoveBg({ title = 'Upload Video', glass = false }: UploadAndRemoveBgProps) {
+  const user = useUser();
+  const clerk = useClerk();
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processedVideoUrl, setProcessedVideoUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string>('#FFFFFF');
   const [customColor, setCustomColor] = useState<string>('#FFFFFF');
-  const inputRef = useRef<HTMLInputElement>(null);
-  const fileRef = useRef<File | null>(null);
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setVideo(file);
-      setPreview(URL.createObjectURL(file));
-      setResultUrl(null);
-      fileRef.current = file;
-    }
-  };
-
-  const handleGenerate = async () => {
-    if (!fileRef.current) {
+  const handleProcess = async () => {
+    if (!uploadedFile) {
       return;
     }
-    setLoading(true);
-    setResultUrl(null);
-    const formData = new FormData();
-    formData.append('file', fileRef.current);
-    formData.append('background_color', selectedColor === '' ? customColor : selectedColor);
+    setIsProcessing(true);
+    setError(null);
+    setProcessedVideoUrl(null);
     try {
+      const formData = new FormData();
+      formData.append('file', uploadedFile);
+      formData.append('background_color', selectedColor);
+      if (user?.id) {
+        formData.append('user_id', user.id);
+      }
       const res = await fetch('/api/remove-bg', {
         method: 'POST',
         body: formData,
       });
-      if (!res.ok) {
-        setLoading(false);
-        return;
-      }
       const data = await res.json();
-      setResultUrl(data.resultUrl);
+      if (res.ok && data.resultUrl) {
+        setProcessedVideoUrl(data.resultUrl);
+      } else {
+        setError(data.error || 'Failed to process video.');
+      }
     } catch {
-      return;
+      setError('Failed to process video. Please try again.');
     } finally {
-      setLoading(false);
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (processedVideoUrl) {
+      try {
+        const response = await fetch(processedVideoUrl, { mode: 'cors' });
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `processed_${uploadedFile?.name || 'video.mp4'}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch {
+        // alert('Download failed. Please try again.');
+      }
     }
   };
 
   return (
-    <section className="w-full flex flex-col md:flex-row items-stretch justify-center gap-8 py-8">
-      {/* 左卡片：上传与生成 */}
-      <div className="bg-white/70 rounded-3xl p-12 shadow-xl flex flex-col items-center max-w-lg w-full border border-pink-100/60 backdrop-blur-2xl">
-        <h3 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 mb-8 drop-shadow-lg">AI Video Background Removal Demo</h3>
-        <input
-          type="file"
-          accept="video/*"
-          className="hidden"
-          ref={inputRef}
-          onChange={handleUpload}
-        />
-        <button
-          className="px-10 py-4 rounded-2xl bg-gradient-to-r from-blue-500 to-pink-500 text-white font-bold text-xl shadow-lg hover:scale-105 transition mb-6"
-          onClick={() => inputRef.current?.click()}
-          type="button"
-        >
-          Upload Video
-        </button>
-        {preview && !resultUrl && (
-          <>
-            <video src={preview} controls className="rounded-xl w-full mb-6 shadow-md">
-              <track kind="captions" />
-            </video>
-            <div className="flex flex-wrap gap-3 mb-6 items-center justify-center">
+    <div className="w-full flex justify-center py-12">
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-8">
+        {/* 左卡片：上传与生成 */}
+        <div className={`backdrop-blur-lg ${glass ? 'bg-white/20' : 'bg-white/60'} rounded-3xl p-6 shadow-xl flex flex-col justify-center items-center`} style={{ minHeight: 480, maxHeight: 540, height: '100%', width: 420 }}>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{title}</h2>
+          {/* 上传区/预览区 */}
+          <div className="border-2 border-dashed border-blue-300 dark:border-blue-700 rounded-xl p-6 text-center cursor-pointer transition-all duration-300 hover:border-blue-500 dark:hover:border-blue-400 mb-4 w-full" style={{ minHeight: 220 }}>
+            {uploadedFile && !processedVideoUrl
+              ? (
+                  <div className="relative">
+                    <video
+                      src={URL.createObjectURL(uploadedFile)}
+                      controls
+                      className="w-full rounded-lg border border-gray-200 dark:border-gray-700"
+                      style={{ maxHeight: 240 }}
+                    >
+                      <track kind="captions" src="" label="English" />
+                      Your browser does not support the video tag.
+                    </video>
+                    <button
+                      type="button"
+                      onClick={() => setUploadedFile(null)}
+                      className="absolute top-2 right-2 bg-white/80 hover:bg-red-500 hover:text-white text-gray-700 rounded-full w-8 h-8 flex items-center justify-center shadow"
+                      title="Remove video"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )
+              : (
+                  <>
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => {
+                        if (!user?.id) {
+                          clerk.openSignIn();
+                          return;
+                        }
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setUploadedFile(file);
+                          setError(null);
+                          setProcessedVideoUrl(null);
+                        }
+                      }}
+                      className="hidden"
+                      id="video-upload"
+                    />
+                    <label htmlFor="video-upload" className="cursor-pointer block" aria-label="Upload video file">
+                      <div className="space-y-4">
+                        <div className="text-6xl">📹</div>
+                        <div className="text-xl font-semibold text-gray-900 dark:text-white">
+                          Click to upload your video
+                        </div>
+                        <div className="text-gray-600 dark:text-gray-400">
+                          or drag and drop files here
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-500">
+                          Supports MP4, MOV, AVI, MKV, WMV (max 100MB)
+                        </div>
+                      </div>
+                    </label>
+                  </>
+                )}
+          </div>
+
+          {/* 背景色选择 */}
+          <div className="mb-4 w-full">
+            <div className="mb-2 font-medium text-gray-700 dark:text-gray-200">Background Color</div>
+            <div className="flex flex-wrap gap-3 items-center">
               {COLORS.map(c => c.name !== 'Custom'
                 ? (
                     <button
                       key={c.value}
-                      className={`w-10 h-10 rounded-full border-2 ${selectedColor === c.value ? 'border-pink-400 scale-110' : 'border-white/40'} transition-all`}
+                      type="button"
+                      className={`w-8 h-8 rounded-full border-2 transition-all ${selectedColor === c.value ? 'border-blue-500 scale-110' : 'border-gray-300 dark:border-gray-600'}`}
                       style={{ background: c.value }}
                       title={c.name}
                       onClick={() => setSelectedColor(c.value)}
@@ -96,48 +165,85 @@ export default function UploadAndRemoveBg({ title: _title = 'AI Video Background
               <input
                 type="color"
                 value={customColor}
-                onChange={(event) => {
-                  setCustomColor(event.target.value);
-                  setSelectedColor('');
+                onChange={(e) => {
+                  setCustomColor(e.target.value);
+                  setSelectedColor(e.target.value);
                 }}
-                className={`w-10 h-10 rounded-full border-2 ${selectedColor === '' ? 'border-pink-400 scale-110' : 'border-white/40'} cursor-pointer`}
+                className={`w-8 h-8 rounded-full border-2 cursor-pointer ${selectedColor === customColor ? 'border-blue-500 scale-110' : 'border-gray-300 dark:border-gray-600'}`}
                 title="Custom color"
               />
             </div>
+          </div>
+
+          {/* 生成按钮 */}
+          <button
+            type="button"
+            onClick={() => {
+              if (!user?.id) {
+                clerk.openSignIn();
+                return;
+              }
+              handleProcess();
+            }}
+            disabled={!uploadedFile || isProcessing}
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 disabled:transform-none mb-0"
+          >
+            {isProcessing
+              ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Processing...
+                  </div>
+                )
+              : (
+                  'Remove Background'
+                )}
+          </button>
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="text-red-800 dark:text-red-200">{error}</div>
+            </div>
+          )}
+        </div>
+
+        {/* 右卡片：生成结果与下载，仅在有结果时显示 */}
+        {processedVideoUrl && (
+          <div className="backdrop-blur-lg bg-white/60 rounded-3xl p-6 shadow-xl flex flex-col justify-center items-center" style={{ minHeight: 480, maxHeight: 540, height: '100%', width: 420 }}>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Processed Result</h2>
+            <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 mb-4 w-full flex justify-center">
+              <video
+                controls
+                className="w-full rounded-lg"
+                src={processedVideoUrl}
+                style={{ maxHeight: 180 }}
+              >
+                <track kind="captions" src="" label="English" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
             <button
-              className="px-10 py-4 rounded-2xl bg-gradient-to-r from-blue-500 to-pink-500 text-white font-bold text-xl shadow-lg hover:scale-105 transition mb-2"
-              onClick={handleGenerate}
-              disabled={loading}
               type="button"
+              onClick={handleDownload}
+              className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl transition-colors duration-300 mb-2"
             >
-              {loading ? 'Processing...' : 'Generate'}
+              Download Video
             </button>
-          </>
-        )}
-        {loading && (
-          <div className="text-blue-600 font-semibold animate-pulse mt-4">Processing with AI, please wait...</div>
+            <button
+              type="button"
+              onClick={() => setProcessedVideoUrl(null)}
+              className="w-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl py-3 px-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-300 mb-2"
+            >
+              Process Another
+            </button>
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mt-2 w-full">
+              <div className="text-sm text-blue-800 dark:text-blue-200">
+                <div className="font-semibold mb-2">Processing Complete!</div>
+                <div>Your video background has been successfully removed. You can now download the processed video or process another file.</div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
-      {/* 右卡片：生成结果与下载，仅在有结果时显示 */}
-      {resultUrl && (
-        <div className="bg-white/70 rounded-3xl p-12 shadow-xl flex flex-col items-center max-w-lg w-full border border-blue-100/60 backdrop-blur-2xl min-h-[340px] justify-center">
-          <video src={resultUrl} controls className="rounded-xl w-full mb-6 shadow-md">
-            <track kind="captions" />
-          </video>
-          <a
-            href={resultUrl}
-            download
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 px-8 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-pink-500 text-white font-bold text-lg shadow-lg hover:scale-105 transition"
-          >
-            Download Result
-          </a>
-          <p className="mt-2 text-xs text-gray-700/70 text-center">
-            If the video opens in a new tab, right-click and choose 'Save as...' to download.
-          </p>
-        </div>
-      )}
-    </section>
+    </div>
   );
 }

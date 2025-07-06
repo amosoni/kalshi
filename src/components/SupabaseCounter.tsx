@@ -1,199 +1,165 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/libs/supabase';
-
-type Counter = {
-  id: number;
-  count: number;
-  updated_at: string;
-  created_at: string;
-};
+import { supabase } from '../libs/supabase';
 
 export default function SupabaseCounter() {
-  const [counters, setCounters] = useState<Counter[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [count, setCount] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 加载计数器数据
-  const loadCounters = async () => {
+  // Load counter data
+  const loadCount = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('counter')
-        .select('*')
-        .order('created_at', { ascending: false });
+      setError(null);
+      const { data, error: err } = await supabase
+        .from('counters')
+        .select('count')
+        .eq('id', 1)
+        .single();
 
-      if (error) {
-        throw error;
+      if (err) {
+        throw err;
       }
-
-      setCounters(data || []);
+      setCount(data?.count || 0);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '加载失败');
+      setError(err instanceof Error ? err.message : 'Failed to load');
     } finally {
       setLoading(false);
     }
   };
 
-  // 增加计数器
-  const incrementCounter = async (id: number, currentCount: number) => {
+  // Increment counter
+  const incrementCount = async () => {
     try {
-      const { error } = await supabase
-        .from('counter')
-        .update({ count: currentCount + 1 })
-        .eq('id', id);
+      setLoading(true);
+      setError(null);
+      const { error: err } = await supabase
+        .from('counters')
+        .update({ count: count + 1 })
+        .eq('id', 1);
 
-      if (error) {
-        throw error;
+      if (err) {
+        throw err;
       }
-
-      // 重新加载数据
-      await loadCounters();
+      // Reload data
+      await loadCount();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '更新失败');
+      setError(err instanceof Error ? err.message : 'Update failed');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 创建新计数器
+  // Create new counter
   const createCounter = async () => {
     try {
-      const { error } = await supabase
-        .from('counter')
-        .insert([{ count: 0 }]);
+      setLoading(true);
+      setError(null);
+      const { error: err } = await supabase
+        .from('counters')
+        .insert({ id: 1, count: 0 });
 
-      if (error) {
-        throw error;
+      if (err) {
+        throw err;
       }
-
-      // 重新加载数据
-      await loadCounters();
+      // Reload data
+      await loadCount();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '创建失败');
+      setError(err instanceof Error ? err.message : 'Creation failed');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 删除计数器
-  const deleteCounter = async (id: number) => {
+  // Delete counter
+  const deleteCounter = async () => {
     try {
-      const { error } = await supabase
-        .from('counter')
+      setLoading(true);
+      setError(null);
+      const { error: err } = await supabase
+        .from('counters')
         .delete()
-        .eq('id', id);
+        .eq('id', 1);
 
-      if (error) {
-        throw error;
+      if (err) {
+        throw err;
       }
-
-      // 重新加载数据
-      await loadCounters();
+      setCount(0);
+      // Reload data
+      await loadCount();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '删除失败');
+      setError(err instanceof Error ? err.message : 'Deletion failed');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 设置实时订阅
+  // Set up real-time subscription
   useEffect(() => {
-    loadCounters();
+    loadCount();
 
-    // 订阅数据库变化
-    const subscription = supabase
+    // Subscribe to database changes
+    const channel = supabase
       .channel('counter_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'counter' }, () => {
-        // 当数据变化时重新加载
-        loadCounters();
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'counters' }, () => {
+        loadCount();
       })
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
+      supabase.removeChannel(channel);
     };
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-lg">加载中...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-4">Supabase 计数器示例</h2>
+    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+      <h2 className="text-2xl font-bold text-center mb-6">Real-time Counter</h2>
+
+      <div className="text-center mb-6">
+        <div className="text-4xl font-bold text-blue-600 mb-2">{count}</div>
+        <div className="text-sm text-gray-500">Current Count</div>
+      </div>
+
+      <div className="space-y-3">
         <button
-          onClick={createCounter}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           type="button"
+          onClick={incrementCount}
+          disabled={loading}
+          className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded transition-colors"
         >
-          创建新计数器
+          {loading ? 'Processing...' : 'Increment'}
+        </button>
+
+        <button
+          type="button"
+          onClick={createCounter}
+          disabled={loading}
+          className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded transition-colors"
+        >
+          {loading ? 'Processing...' : 'Create Counter'}
+        </button>
+
+        <button
+          type="button"
+          onClick={deleteCounter}
+          disabled={loading}
+          className="w-full bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded transition-colors"
+        >
+          {loading ? 'Processing...' : 'Delete Counter'}
         </button>
       </div>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
         </div>
       )}
 
-      <div className="space-y-4">
-        {counters.length === 0
-          ? (
-              <div className="text-gray-500 text-center py-8">
-                暂无计数器，点击上方按钮创建一个
-              </div>
-            )
-          : (
-              counters.map(counter => (
-                <div
-                  key={counter.id}
-                  className="border rounded-lg p-4 flex items-center justify-between"
-                >
-                  <div>
-                    <div className="text-lg font-semibold">
-                      计数器 #
-                      {counter.id}
-                    </div>
-                    <div className="text-3xl font-bold text-blue-600">
-                      {counter.count}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      创建于:
-                      {' '}
-                      {new Date(counter.created_at).toLocaleString()}
-                    </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => incrementCounter(counter.id, counter.count)}
-                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                      type="button"
-                    >
-                      +1
-                    </button>
-                    <button
-                      onClick={() => deleteCounter(counter.id)}
-                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                      type="button"
-                    >
-                      删除
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-      </div>
-
-      <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-        <h3 className="font-semibold mb-2">功能说明：</h3>
-        <ul className="text-sm space-y-1">
-          <li>• 实时数据同步：数据变化会自动更新</li>
-          <li>• 创建计数器：点击按钮创建新的计数器</li>
-          <li>• 增加计数：点击 +1 按钮增加计数</li>
-          <li>• 删除计数器：点击删除按钮移除计数器</li>
-          <li>• 错误处理：显示操作错误信息</li>
-        </ul>
+      <div className="mt-6 text-xs text-gray-500 text-center">
+        <p>This counter demonstrates real-time updates using Supabase subscriptions.</p>
+        <p>Open this page in multiple tabs to see real-time synchronization.</p>
       </div>
     </div>
   );

@@ -11,13 +11,16 @@ export default function HeroSection() {
       <div className="absolute inset-0 opacity-10 pointer-events-none select-none">
         <div className="absolute inset-0" style={bgStyle} />
       </div>
-      <div className="relative z-10 w-full flex flex-col items-center justify-center text-center">
-        <h1 className="mb-6 text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-white drop-shadow-lg">
-          Remove Video Background Instantly
+      <div className="relative z-10 w-full flex flex-col items-start justify-center text-left pl-4 md:pl-12 max-w-none">
+        <h1 className="mb-2 text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-white drop-shadow-lg">
+          Remove Video Background
         </h1>
-        <h2 className="mb-0 text-lg md:text-2xl lg:text-3xl font-medium text-white/90 max-w-2xl">
-          Upload your video and let our AI remove the background in seconds. No green screen, no complex editing, just professional results.
+        <h2 className="mb-4 text-3xl md:text-4xl lg:text-5xl font-bold text-white/90">
+          Instantly
         </h2>
+        <p className="text-lg md:text-2xl font-normal text-white/80">
+          Upload your video and let our AI remove the background in seconds. No green screen, no complex editing, just professional results.
+        </p>
       </div>
     </div>
   );

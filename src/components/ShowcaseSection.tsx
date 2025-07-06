@@ -2,7 +2,7 @@ export default function ShowcaseSection() {
   return (
     <section className="w-full py-20 flex flex-col items-center bg-white px-4 md:px-8">
       <div className="w-full max-w-6xl flex flex-col items-center">
-        <h2 className="text-3xl font-bold mb-10 text-gray-900">AI前后对比</h2>
+        <h2 className="text-3xl font-bold mb-10 text-gray-900">AI Before & After Comparison</h2>
         <div className="w-full flex flex-col md:flex-row gap-8 items-center justify-center">
           {['Before', 'After'].map(label => (
             <div

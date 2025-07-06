@@ -1,3 +1,5 @@
+'use client';
+
 export default function FeaturesSection() {
   const features = [
     {
@@ -9,6 +11,7 @@ export default function FeaturesSection() {
       title: 'AI Background Removal',
       description: 'Upload your video and let AI automatically remove the background. No green screen, no manual work. Advanced machine learning ensures precise edge detection.',
       link: 'Try Now',
+      href: '#demo',
     },
     {
       icon: (
@@ -19,6 +22,7 @@ export default function FeaturesSection() {
       title: 'Multiple Background Colors',
       description: 'Easily switch to white, green, black, blue, pink, or custom colors. Supports various preset backgrounds for different scenarios.',
       link: 'View Colors',
+      href: '#colors',
     },
     {
       icon: (
@@ -29,6 +33,7 @@ export default function FeaturesSection() {
       title: 'Supports Multiple Formats',
       description: 'Supports MP4, MOV, AVI and other mainstream video formats. For best results, upload high-definition videos.',
       link: 'View Formats',
+      href: '#formats',
     },
     {
       icon: (
@@ -39,6 +44,7 @@ export default function FeaturesSection() {
       title: 'Fast Large File Processing',
       description: 'Supports large file uploads, results in seconds, preview and download with no barriers. Free users: 3 times per day, up to 30 seconds per video.',
       link: 'View Limits',
+      href: '#limits',
     },
   ];
 
@@ -75,12 +81,6 @@ export default function FeaturesSection() {
                 <p className="mb-8 text-gray-600 dark:text-gray-300 lg:mb-9">
                   {feature.description}
                 </p>
-                <a
-                  href="#demo"
-                  className="text-base font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                >
-                  {feature.link}
-                </a>
               </div>
             </div>
           ))}
