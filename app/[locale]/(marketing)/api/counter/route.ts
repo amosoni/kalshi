@@ -2,12 +2,20 @@ import { sql } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import z from 'zod/v4';
-import { db } from '@/libs/DB';
+import { db, runMigrations } from '@/libs/DB';
 import { logger } from '@/libs/Logger';
 import { counterSchema } from '@/models/Schema';
 import { CounterValidation } from '@/validations/CounterValidation';
 
 export const PUT = async (request: Request) => {
+  // Skip database operations during build time
+  if (!db) {
+    return NextResponse.json({ error: 'Database not available' }, { status: 503 });
+  }
+
+  // Ensure migrations are run before database operations
+  await runMigrations();
+
   const json = await request.json();
   const parse = CounterValidation.safeParse(json);
 
