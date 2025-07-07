@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const runtime = 'nodejs';
 
-const usageMap: Map<string, { date: string; count: number; duration: number }> = new Map();
+// 移除 usageMap 和免费额度相关逻辑
 
 const fetch = (url: any, options: any) => fetchOrig(url, options);
 
@@ -23,26 +23,12 @@ const supabase = createClient(
 const proxyUrl = process.env.PROXY_URL; // 例：http://127.0.0.1:7899
 const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
 
-// ====== 免费额度限制（MVP，基于IP，内存Map） ======
-// 所有 var 声明已移到函数顶部或改为 let/const
-
 export async function POST(req: NextRequest) {
   const { userId } = getAuth(req);
   if (!userId) {
     return new Response(JSON.stringify({ error: 'Not authenticated' }), { status: 401 });
   }
   try {
-    // 0. 获取IP和日期
-    const ip = req.headers.get('x-forwarded-for') || 'unknown';
-    const today = new Date().toISOString().slice(0, 10);
-    let usage = usageMap.get(ip) || { date: today, count: 0, duration: 0 };
-    if (usage.date !== today) {
-      usage = { date: today, count: 0, duration: 0 };
-    }
-    if (usage.count >= 3 || usage.duration >= 60) {
-      return new Response(JSON.stringify({ error: '今日免费额度已用完（每天最多3次或累计60秒）' }), { status: 429 });
-    }
-
     // 1. 解析 multipart/form-data
     const formData = await req.formData();
     const file = formData.get('file') as File;
@@ -57,7 +43,6 @@ export async function POST(req: NextRequest) {
     const backgroundColor = formData.get('background_color') as string || '#FFFFFF';
 
     // ====== 检查视频时长（每次最多30秒） ======
-    // 临时保存文件用于ffprobe
     const tempPath = path.join(os.tmpdir(), fileName);
     fs.writeFileSync(tempPath, buffer);
     const getDuration = async (filePath: string) => {
@@ -74,13 +59,8 @@ export async function POST(req: NextRequest) {
     if (durationSec > 30) {
       return new Response(JSON.stringify({ error: '免费用户每次最多处理30秒视频' }), { status: 429 });
     }
-    // ====== 更新用量 ======
-    usage.count += 1;
-    usage.duration += durationSec;
-    usageMap.set(ip, usage);
 
     // ====== 积分校验 ======
-    // 查询当前用户积分
     const { data: pointsData, error: pointsError } = await supabase
       .from('points')
       .select('balance')
@@ -90,7 +70,7 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ error: 'Failed to fetch points' }), { status: 500 });
     }
     const currentBalance = pointsData?.balance || 0;
-    const cost = 1; // 每次消耗1积分，可根据实际调整
+    const cost = durationSec / 60; // 精确到秒计费，1积分=60秒
     if (currentBalance < cost) {
       return new Response(JSON.stringify({ error: 'Insufficient points', currentBalance, requiredAmount: cost }), { status: 403 });
     }

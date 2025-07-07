@@ -1,8 +1,27 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAuth } from '@clerk/nextjs/server';
+import rateLimit from 'express-rate-limit';
+import { checkDeviceId } from '../../lib/checkDeviceId';
+import { verifyCaptcha } from '../../lib/verifyCaptcha';
 import { supabase } from '../../src/libs/supabase';
 
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15分钟
+  max: 100, // 每IP最多100次
+  message: 'Too many requests from this IP, please try again later.',
+});
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  await apiLimiter(req, res, () => {});
+  if (req.method === 'POST') {
+    const { captchaToken, deviceId } = req.body;
+    if (!(await verifyCaptcha(captchaToken))) {
+      return res.status(400).json({ error: '验证码校验失败' });
+    }
+    if (!(await checkDeviceId(deviceId))) {
+      return res.status(429).json({ error: '设备操作过于频繁' });
+    }
+  }
   const { userId } = getAuth(req);
   if (!userId) {
     return res.status(401).json({ error: 'Not authenticated' });
