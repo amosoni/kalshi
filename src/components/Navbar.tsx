@@ -22,11 +22,11 @@ export default function Navbar() {
   }, []);
 
   const navItems = [
-    { name: 'Home', href: '/' },
+    { name: 'Home', href: '/#home' },
     { name: 'Features', href: '/#features' },
-    { name: 'Pricing', href: '/pricing' },
+    { name: 'Pricing', href: '/#pricing' },
     { name: 'Testimonials', href: '/#testimonials' },
-    { name: 'FAQ', href: '/faq' },
+    { name: 'FAQ', href: '/#faq' },
     { name: 'Contact', href: '/#contact' },
   ];
 

@@ -28,39 +28,33 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/" className="text-gray-400 hover:text-white transition-colors">Home</Link></li>
-              <li><Link href="/features" className="text-gray-400 hover:text-white transition-colors">Features</Link></li>
-              <li><Link href="/demo" className="text-gray-400 hover:text-white transition-colors">Demo</Link></li>
-              <li><Link href="/pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</Link></li>
-              <li><Link href="/testimonials" className="text-gray-400 hover:text-white transition-colors">Testimonials</Link></li>
+              <li><Link href="/#home" className="text-gray-400 hover:text-white transition-colors">Home</Link></li>
+              <li><Link href="/#features" className="text-gray-400 hover:text-white transition-colors">Features</Link></li>
+              <li><Link href="/#demo" className="text-gray-400 hover:text-white transition-colors">Demo</Link></li>
+              <li><Link href="/#pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</Link></li>
+              <li><Link href="/#testimonials" className="text-gray-400 hover:text-white transition-colors">Testimonials</Link></li>
             </ul>
           </div>
           {/* Support */}
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">Support</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/faq" className="text-gray-400 hover:text-white transition-colors">FAQ</Link></li>
-              <li><Link href="/contact" className="text-gray-400 hover:text-white transition-colors">Contact Support</Link></li>
+              <li><Link href="/#faq" className="text-gray-400 hover:text-white transition-colors">FAQ</Link></li>
+              <li><Link href="/#contact" className="text-gray-400 hover:text-white transition-colors">Contact Support</Link></li>
             </ul>
           </div>
         </div>
         {/* Right: Contact form */}
-        <div className="flex-shrink-0 w-full md:w-auto md:max-w-xs">
-          <div className="mb-4 text-blue-400 font-semibold text-center md:text-left">Need Help?</div>
-          <div className="mb-2 text-2xl font-bold text-white text-center md:text-left">Contact Us</div>
-          <div className="mb-4 text-gray-300 text-sm text-center md:text-left">Our team is here to help you with any questions or support you need.</div>
-          <div className="bg-gradient-to-br from-gray-800/90 to-gray-700/80 rounded-2xl p-5 shadow-xl w-full max-w-sm mx-auto text-center border border-blue-700/30 backdrop-blur-md flex flex-col items-center">
-            <div className="text-gray-300 text-base mb-3 tracking-wide">Email us directly:</div>
-            <a
-              href="mailto:soniceono@gmail.com"
-              className="flex items-center justify-center gap-2 text-blue-400 hover:text-blue-200 text-lg font-bold tracking-wide transition-colors duration-200 bg-blue-900/20 px-6 py-3 rounded-xl shadow-lg hover:shadow-2xl whitespace-nowrap"
-              style={{ letterSpacing: '0.02em', minWidth: 'fit-content' }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16 12H8m8 0a4 4 0 11-8 0 4 4 0 018 0zm0 0v4a4 4 0 01-8 0v-4" />
-              </svg>
-              <span className="font-mono text-lg">soniceono@gmail.com</span>
-            </a>
+        <div className="flex-shrink-0 w-full md:w-auto md:max-w-xs" id="contact">
+          <div className="mb-2 text-3xl font-extrabold text-white text-center md:text-left">Contact Us</div>
+          <div className="mb-4 text-gray-300 text-base text-center md:text-left">Our team is here to help you with any questions or support you need.</div>
+          <div className="mb-4 text-lg flex items-center justify-center md:justify-start" style={{ fontSize: '1.35rem' }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-3">
+              <rect width="24" height="24" rx="6" fill="#2563eb" />
+              <path d="M6 8.5L12 13L18 8.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <rect x="6" y="8" width="12" height="8" rx="2" stroke="#fff" strokeWidth="1.5" />
+            </svg>
+            <a href="mailto:soniceono@gmail.com" style={{ color: '#2563eb', textDecoration: 'none', fontSize: '1.35rem', fontWeight: 600 }}>soniceono@gmail.com</a>
           </div>
         </div>
       </div>

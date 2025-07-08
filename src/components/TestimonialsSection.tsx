@@ -105,15 +105,15 @@ export default function TestimonialsSection() {
               <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                 <div className="bg-white dark:bg-gray-900 rounded-lg p-6 shadow-lg">
                   <div className="text-3xl font-bold text-blue-600 mb-2">Free Trial</div>
-                  <div className="text-gray-600 dark:text-gray-300">3 times per day</div>
+                  <div className="text-gray-600 dark:text-gray-300">New users get 3 free credits</div>
                 </div>
                 <div className="bg-white dark:bg-gray-900 rounded-lg p-6 shadow-lg">
                   <div className="text-3xl font-bold text-blue-600 mb-2">Fast Processing</div>
-                  <div className="text-gray-600 dark:text-gray-300">Completed in 30 seconds</div>
+                  <div className="text-gray-600 dark:text-gray-300">Instant results</div>
                 </div>
                 <div className="bg-white dark:bg-gray-900 rounded-lg p-6 shadow-lg">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">Multi-color Support</div>
-                  <div className="text-gray-600 dark:text-gray-300">6 background colors</div>
+                  <div className="text-3xl font-bold text-blue-600 mb-2">Unlimited Color Support</div>
+                  <div className="text-gray-600 dark:text-gray-300">Supports unlimited background colors</div>
                 </div>
               </div>
             </div>

@@ -6,7 +6,7 @@ import '../styles/global.css';
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-gray-100 flex flex-col">
         <Navbar />
         <main className="flex-1 pt-20">{children}</main>
         <Footer />

@@ -127,11 +127,10 @@ export default function PricingSection() {
           <h2 className="text-2xl font-bold mb-4">Free Trial</h2>
           <div className="text-3xl font-bold text-white mb-2">Free</div>
           <ul className="mb-4 text-gray-200 text-sm space-y-1">
-            <li>3 free uses per day</li>
-            <li>Up to 30 seconds per video</li>
-            <li>720p resolution</li>
+            <li>New users get 3 free credits</li>
+            <li>1 credit = 1 minute of processing</li>
             <li>Basic AI processing</li>
-            <li>Watermark included</li>
+            <li>Recharge after credits are used up</li>
           </ul>
           <button
             type="button"

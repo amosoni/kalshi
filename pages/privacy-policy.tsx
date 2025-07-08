@@ -9,7 +9,7 @@ export default function PrivacyPolicy() {
         <meta name="description" content="Read the privacy policy for kalshi ai, the best AI tool to Remove Video Background online. Learn how we protect your data and privacy." />
         <meta name="keywords" content="kalshi ai, Remove Video Background, privacy policy, AI video editing, data protection" />
       </Head>
-      <div className="max-w-3xl mx-auto bg-gray-800/90 rounded-2xl shadow-2xl p-8 md:p-12 border border-blue-700/20 mt-10 md:mt-16">
+      <div className="max-w-3xl mx-auto bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 p-8 md:p-12 mt-10 md:mt-16">
         <h1 className="text-3xl md:text-4xl font-extrabold mb-6 text-blue-400">Privacy Policy</h1>
         <p className="mb-4 text-lg">
           Welcome to

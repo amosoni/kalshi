@@ -20,7 +20,7 @@ export default function FAQSection() {
     },
     {
       question: 'Can I use a custom background image?',
-      answer: 'Yes! Basic and Pro users can upload a custom background image or choose from our library. You can also use solid or gradient backgrounds.',
+      answer: 'Currently, only preset and solid/gradient background colors are supported. Uploading custom background images is not available yet.',
     },
     {
       question: 'Is my video data safe?',
@@ -28,15 +28,15 @@ export default function FAQSection() {
     },
     {
       question: 'What are the differences between plans?',
-      answer: 'The Free plan includes 3 processes per day, up to 30 seconds per video, with watermark. Basic plan offers 30 processes per month, up to 5 minutes per video, no watermark, and advanced features. Pro plan includes unlimited processing, API access, and dedicated support.',
+      answer: 'The Free plan gives new users 3 free credits. Each credit = 1 minute of processing. After using up the credits, you need to recharge. Basic plan offers 30 processes per month, up to 5 minutes per video, no watermark, and advanced features. Pro plan includes unlimited processing, API access, and dedicated support.',
     },
     {
       question: 'What are the limitations for free users?',
-      answer: 'Free users can process up to 3 videos per day or a total of 60 seconds. Each process is limited to 30 seconds. For best results, upload high-quality videos.',
+      answer: 'New users get 3 free credits, each credit can process 1 minute of video. After using up the free credits, you need to recharge to continue using the service.',
     },
     {
-      question: 'Can I batch process multiple videos?',
-      answer: 'Yes, Basic and Pro plans support batch processing. You can upload multiple videos at once, and AI will process them sequentially. This greatly improves efficiency.',
+      question: 'Can I process multiple videos in batch?',
+      answer: 'Batch processing is not supported at the moment. You can only process one video at a time.',
     },
   ];
 

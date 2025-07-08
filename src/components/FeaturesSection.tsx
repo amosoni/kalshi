@@ -42,7 +42,7 @@ export default function FeaturesSection() {
         </svg>
       ),
       title: 'Fast Large File Processing',
-      description: 'Supports large file uploads, results in seconds, preview and download with no barriers. Free users: 3 times per day, up to 30 seconds per video.',
+      description: 'Supports large file uploads, instant results, seamless preview and download. New users get 3 free credits, each credit allows 1 minute of processing. Recharge after credits are used up.',
       link: 'View Limits',
       href: '#limits',
     },
