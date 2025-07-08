@@ -44,11 +44,13 @@ export async function POST(req: NextRequest) {
 
     const backgroundColor = formData.get('background_color') as string || '#FFFFFF';
 
+    console.error('ffprobeStatic.path', ffprobeStatic.path, fs.existsSync(ffprobeStatic.path));
     // ====== 检查视频时长（每次最多30秒） ======
     const tempPath = path.join(os.tmpdir(), fileName);
     fs.writeFileSync(tempPath, buffer);
     const getDuration = (filePath: string) => {
       const ffprobePath = ffprobeStatic.path;
+      console.error('ffprobeStatic.path in getDuration', ffprobePath, fs.existsSync(ffprobePath));
       try {
         const out = execSync(`"${ffprobePath}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`).toString();
         return Math.ceil(Number.parseFloat(out));

@@ -11,7 +11,7 @@ const baseConfig: NextConfig = {
   },
   poweredByHeader: false,
   reactStrictMode: true,
-  serverExternalPackages: ['@electric-sql/pglite'],
+  serverExternalPackages: ['@electric-sql/pglite', 'ffprobe-static'],
 };
 
 // Initialize the Next-Intl plugin
