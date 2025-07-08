@@ -4,8 +4,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { getAuth } from '@clerk/nextjs/server';
-import ffprobeInstaller from '@ffprobe-installer/ffprobe';
 import { createClient } from '@supabase/supabase-js';
+import ffprobeStatic from 'ffprobe-static';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import fetchOrig from 'node-fetch';
 import { v4 as uuidv4 } from 'uuid';
@@ -48,8 +48,9 @@ export async function POST(req: NextRequest) {
     fs.writeFileSync(tempPath, buffer);
     const getDuration = async (filePath: string) => {
       const { execSync } = await import('node:child_process');
+      const ffprobePath = ffprobeStatic.path;
       try {
-        const out = execSync(`"${ffprobeInstaller.path}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`).toString();
+        const out = execSync(`"${ffprobePath}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`).toString();
         return Math.ceil(Number.parseFloat(out));
       } catch {
         return 0;
