@@ -1,5 +1,5 @@
 import { SignOutButton } from '@clerk/nextjs';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import { BaseTemplate } from '@/templates/BaseTemplate';
@@ -10,10 +10,10 @@ export default async function DashboardLayout(props: {
 }) {
   const { locale } = await props.params;
   setRequestLocale(locale);
-  const t = await getTranslations({
-    locale,
-    namespace: 'DashboardLayout',
-  });
+  // const t = await getTranslations({
+  //   locale,
+  //   namespace: 'DashboardLayout',
+  // });
 
   return (
     <BaseTemplate
@@ -24,7 +24,7 @@ export default async function DashboardLayout(props: {
               href="/dashboard/"
               className="border-none text-gray-700 hover:text-gray-900"
             >
-              {t('dashboard_link')}
+              {/* {t('dashboard_link')} */}
             </Link>
           </li>
           <li>
@@ -32,7 +32,7 @@ export default async function DashboardLayout(props: {
               href="/dashboard/user-profile/"
               className="border-none text-gray-700 hover:text-gray-900"
             >
-              {t('user_profile_link')}
+              {/* {t('user_profile_link')} */}
             </Link>
           </li>
         </>
@@ -42,7 +42,7 @@ export default async function DashboardLayout(props: {
           <li>
             <SignOutButton>
               <button className="border-none text-gray-700 hover:text-gray-900" type="button">
-                {t('sign_out')}
+                {/* {t('sign_out')} */}
               </button>
             </SignOutButton>
           </li>

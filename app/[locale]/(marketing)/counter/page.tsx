@@ -1,22 +1,21 @@
 import { useTranslations } from 'next-intl';
-import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import { Suspense } from 'react';
 import { CounterForm } from '@/components/CounterForm';
 import { CurrentCount } from '@/components/CurrentCount';
 
-export async function generateMetadata(props: {
+export async function generateMetadata(_props: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await props.params;
-  const t = await getTranslations({
-    locale,
-    namespace: 'Counter',
-  });
+  // const { locale } = await props.params;
+  // const t = await getTranslations({
+  //   locale,
+  //   namespace: 'Counter',
+  // });
 
   return {
-    title: t('meta_title'),
-    description: t('meta_description'),
+    title: 'Counter', // Placeholder, as namespace fallback is commented out
+    description: 'Counter description', // Placeholder, as namespace fallback is commented out
   };
 }
 

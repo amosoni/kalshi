@@ -21,10 +21,7 @@ export async function generateMetadata(props: IAboutProps) {
 export default async function About(props: IAboutProps) {
   const { locale } = await props.params;
   setRequestLocale(locale);
-  const t = await getTranslations({
-    locale,
-    namespace: 'About',
-  });
+  const t = await getTranslations({ locale, namespace: 'About' });
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { setRequestLocale } from 'next-intl/server';
 
 import ContactSection from '@/components/ContactSection';
 import FAQSection from '@/components/FAQSection';
@@ -14,16 +14,15 @@ type IIndexProps = {
   params: Promise<{ locale: string }>;
 };
 
-export async function generateMetadata(props: IIndexProps) {
-  const { locale } = await props.params;
-  const t = await getTranslations({
-    locale,
-    namespace: 'Index',
-  });
+export async function generateMetadata(_props: IIndexProps) {
+  // const t = await getTranslations({
+  //   locale,
+  //   namespace: 'Index',
+  // });
 
   return {
-    title: t('meta_title'),
-    description: t('meta_description'),
+    title: 'AI Background Removal', // Fallback title
+    description: 'Remove background from your videos with AI.', // Fallback description
   };
 }
 
