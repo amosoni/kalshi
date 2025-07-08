@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { getAuth } from '@clerk/nextjs/server';
+import ffprobeInstaller from '@ffprobe-installer/ffprobe';
 import { createClient } from '@supabase/supabase-js';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import fetchOrig from 'node-fetch';
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
     const getDuration = async (filePath: string) => {
       const { execSync } = await import('node:child_process');
       try {
-        const out = execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`).toString();
+        const out = execSync(`"${ffprobeInstaller.path}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`).toString();
         return Math.ceil(Number.parseFloat(out));
       } catch {
         return 0;
@@ -56,6 +57,9 @@ export async function POST(req: NextRequest) {
     };
     const durationSec = await getDuration(tempPath);
     fs.unlinkSync(tempPath);
+    if (durationSec <= 0) {
+      return new Response(JSON.stringify({ error: 'Failed to get video duration' }), { status: 400 });
+    }
     if (durationSec > 30) {
       return new Response(JSON.stringify({ error: '免费用户每次最多处理30秒视频' }), { status: 429 });
     }
