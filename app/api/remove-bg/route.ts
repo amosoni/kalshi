@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { Buffer } from 'node:buffer';
+import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -46,8 +47,7 @@ export async function POST(req: NextRequest) {
     // ====== 检查视频时长（每次最多30秒） ======
     const tempPath = path.join(os.tmpdir(), fileName);
     fs.writeFileSync(tempPath, buffer);
-    const getDuration = async (filePath: string) => {
-      const { execSync } = await import('node:child_process');
+    const getDuration = (filePath: string) => {
       const ffprobePath = ffprobeStatic.path;
       try {
         const out = execSync(`"${ffprobePath}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`).toString();
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
         return 0;
       }
     };
-    const durationSec = await getDuration(tempPath);
+    const durationSec = getDuration(tempPath);
     fs.unlinkSync(tempPath);
     if (durationSec <= 0) {
       return new Response(JSON.stringify({ error: 'Failed to get video duration' }), { status: 400 });
