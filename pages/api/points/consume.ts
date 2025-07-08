@@ -9,6 +9,15 @@ const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15分钟
   max: 100, // 每IP最多100次
   message: 'Too many requests from this IP, please try again later.',
+  keyGenerator: (req) => {
+    return (
+      req.headers['x-forwarded-for']
+      || req.connection?.remoteAddress
+      || req.socket?.remoteAddress
+      || req.ip
+      || 'unknown'
+    );
+  },
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
