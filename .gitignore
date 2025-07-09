@@ -32,8 +32,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# local env files
-.env*.local
+# 忽略环境变量文件，防止敏感信息泄露
+.env
+.env.local
+.env.production
 
 # Sentry Config File
 .env.sentry-build-plugin
@@ -60,3 +62,5 @@ build-archive.log
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+/generated/prisma

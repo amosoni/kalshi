@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// NextAuth 所需表
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String?   @unique
+  emailVerified  DateTime?
+  image          String?
+  accounts       Account[]
+  sessions       Session[]
+  // 你可以加自定义字段
+  createdAt      DateTime  @default(now())
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// 你可以在这里继续添加你原有的业务表（如 points、orders 等）
+
+model Points {
+  id           String   @id @default(cuid())
+  user_id      String   @unique
+  balance      Int      // 单位：秒
+  total_earned Int
+  total_spent  Int
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
+}
+
+model PointsLog {
+  id            String   @id @default(cuid())
+  user_id       String
+  type          String   // 'earn' | 'spend' | 'recharge'
+  amount        Int      // 变动秒数
+  balance_after Int
+  description   String?
+  createdAt     DateTime @default(now())
+}
