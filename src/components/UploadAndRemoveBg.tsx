@@ -1,6 +1,5 @@
 'use client';
 
-import { useClerk } from '@clerk/nextjs';
 import { useState } from 'react';
 import { useUser } from '../hooks/useUser';
 
@@ -20,7 +19,6 @@ type UploadAndRemoveBgProps = {
 
 export default function UploadAndRemoveBg({ title = 'Upload Video', glass = false }: UploadAndRemoveBgProps) {
   const user = useUser();
-  const clerk = useClerk();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedVideoUrl, setProcessedVideoUrl] = useState<string | null>(null);
@@ -115,7 +113,8 @@ export default function UploadAndRemoveBg({ title = 'Upload Video', glass = fals
                       accept="video/*"
                       onChange={(e) => {
                         if (!user?.id) {
-                          clerk.openSignIn();
+                          // clerk.openSignIn(); // Removed Clerk
+                          alert('Please sign in to upload files.');
                           return;
                         }
                         const file = e.target.files?.[0];
@@ -180,7 +179,8 @@ export default function UploadAndRemoveBg({ title = 'Upload Video', glass = fals
             type="button"
             onClick={() => {
               if (!user?.id) {
-                clerk.openSignIn();
+                // clerk.openSignIn(); // Removed Clerk
+                alert('Please sign in to process videos.');
                 return;
               }
               handleProcess();

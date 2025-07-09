@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
-import Navbar from '@/components/Navbar';
+import NavbarWrapper from '@/components/NavbarWrapper';
 
 export default function MarketingLayout({ children }: { children: ReactNode }) {
   return (
     <>
-      <Navbar />
+      <NavbarWrapper />
       <main className="w-full min-h-screen flex flex-col">
         {children}
       </main>

@@ -1,9 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getAuth } from '@clerk/nextjs/server';
+import { getServerSession } from 'next-auth';
 import { supabase } from '@/libs/supabase';
+import { authOptions } from '../../../app/api/auth/[...nextauth]/authOptions';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { userId } = getAuth(req);
+  // 用 NextAuth session 获取 userId
+  const session = await getServerSession(req, res, authOptions);
+  const userId = session?.user?.id;
   if (!userId) {
     return res.status(401).json({ error: 'Not authenticated' });
   }

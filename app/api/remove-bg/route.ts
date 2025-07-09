@@ -4,12 +4,13 @@ import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { getAuth } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
 import ffprobeStatic from 'ffprobe-static';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { getServerSession } from 'next-auth';
 import fetchOrig from 'node-fetch';
 import { v4 as uuidv4 } from 'uuid';
+import { authOptions } from '../auth/[...nextauth]/authOptions';
 
 export const runtime = 'nodejs';
 
@@ -26,7 +27,9 @@ const proxyUrl = process.env.PROXY_URL; // 例：http://127.0.0.1:7899
 const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
 
 export async function POST(req: NextRequest) {
-  const { userId } = getAuth(req);
+  // 用 NextAuth session 获取 userId
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
   if (!userId) {
     return new Response(JSON.stringify({ error: 'Not authenticated' }), { status: 401 });
   }
@@ -65,6 +68,17 @@ export async function POST(req: NextRequest) {
     }
     if (durationSec > 30) {
       return new Response(JSON.stringify({ error: '免费用户每次最多处理30秒视频' }), { status: 429 });
+    }
+
+    // ====== Render 后端时长校验 ======
+    const renderResp = await fetch('https://kalshi-7z8f.onrender.com/api/validate-duration', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, videoDuration: durationSec }),
+    });
+    const renderData = await renderResp.json() as { valid: boolean; reason?: string };
+    if (!renderData.valid) {
+      return new Response(JSON.stringify({ error: renderData.reason || '视频时长校验失败' }), { status: 429 });
     }
 
     // ====== 积分校验 ======

@@ -1,15 +1,9 @@
-import { setRequestLocale } from 'next-intl/server';
+import type { ReactNode } from 'react';
 
-export default async function CenteredLayout(props: {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await props.params;
-  setRequestLocale(locale);
+type IAuthCenterLayoutProps = {
+  children: ReactNode;
+};
 
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      {props.children}
-    </div>
-  );
+export default async function AuthCenterLayout({ children }: IAuthCenterLayoutProps) {
+  return <>{children}</>;
 }

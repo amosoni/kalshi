@@ -1,14 +1,13 @@
-import { useUser as useClerkUser } from '@clerk/nextjs';
+import { useSession } from 'next-auth/react';
 
 export function useUser() {
-  const { user, isSignedIn } = useClerkUser();
-  if (!isSignedIn || !user) {
+  const sessionData = useSession();
+  const session = sessionData?.data;
+  if (!session || !session.user) {
     return null;
   }
-  // 兼容原有supabase user结构，返回id和email
   return {
-    id: user.id,
-    email: user.primaryEmailAddress?.emailAddress || '',
-    // 可按需扩展其它字段
+    id: (session.user as any).id,
+    email: session.user.email || '',
   };
 }

@@ -1,27 +1,27 @@
 import FAQSection from '@/components/FAQSection';
 import FeaturesSection from '@/components/FeaturesSection';
 import Footer from '@/components/Footer';
-import HeroWithUploadSection from '@/components/HeroWithUploadSection';
+import HeroWithUploadSectionClient from '@/components/HeroWithUploadSectionClient';
 import HowItWorksSection from '@/components/HowItWorksSection';
-import Navbar from '@/components/Navbar';
-import PricingSection from '@/components/PricingSection';
+import NavbarWrapper from '@/components/NavbarWrapper';
+import PricingSectionWrapper from '@/components/PricingSectionWrapper';
 import TestimonialsSection from '@/components/TestimonialsSection';
 
 export default function Page() {
   return (
     <>
-      <Navbar />
+      <NavbarWrapper />
       <main className="min-h-screen w-full bg-gray-50">
         <h1 className="sr-only">Remove Video Background Online | kalshi ai</h1>
         <h2 className="sr-only">kalshi ai - Best AI Remove Video Background Tool</h2>
-        <HeroWithUploadSection />
+        <HeroWithUploadSectionClient />
         <FeaturesSection />
         <HowItWorksSection />
-        <PricingSection />
+        <PricingSectionWrapper />
         <TestimonialsSection />
         <FAQSection />
-        <Footer />
       </main>
+      <Footer />
     </>
   );
 }

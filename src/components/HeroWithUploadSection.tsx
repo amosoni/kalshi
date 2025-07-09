@@ -1,6 +1,6 @@
 'use client';
 import HeroSection from './HeroSection';
-import UploadAndRemoveBg from './UploadAndRemoveBg';
+import UploadAndRemoveBgWrapper from './UploadAndRemoveBgWrapper';
 
 export default function HeroWithUploadSection() {
   return (
@@ -12,7 +12,7 @@ export default function HeroWithUploadSection() {
         </div>
         {/* 右侧：上传卡片 */}
         <div className="w-full md:w-[400px] flex flex-col items-end">
-          <UploadAndRemoveBg />
+          <UploadAndRemoveBgWrapper />
         </div>
       </div>
     </section>

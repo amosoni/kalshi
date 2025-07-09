@@ -1,4 +1,4 @@
-import { useClerk } from '@clerk/nextjs';
+import { signIn } from 'next-auth/react';
 import { useEffect, useRef, useState } from 'react';
 import { useUser } from './useUser';
 
@@ -126,13 +126,12 @@ export function usePointsLog() {
 
 export function useRecharge() {
   const user = useUser();
-  const clerk = useClerk();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const recharge = async (product_id: string) => {
     if (!user) {
-      clerk.openSignIn();
+      signIn('google');
       return;
     }
     try {
