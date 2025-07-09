@@ -55,10 +55,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: error.message });
     }
     if (!data) {
-      // 新用户，自动插入初始积分
+      // 新用户，自动插入初始积分（3 分钟=180 秒）
       const { error: insertError } = await supabase
         .from('points')
-        .insert({ user_id, balance: 0, total_earned: 0, total_spent: 0 });
+        .insert({ user_id, balance: 180, total_earned: 180, total_spent: 0 });
       if (insertError) {
         if (insertError.code === '23505') { // 主键冲突
           // 再查一次并返回已有数据
@@ -79,7 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('Supabase INSERT error:', insertError);
         return res.status(500).json({ error: insertError.message });
       }
-      return res.status(200).json({ balance: 0, total_earned: 0, total_spent: 0 });
+      return res.status(200).json({ balance: 180, total_earned: 180, total_spent: 0 });
     }
     return res.status(200).json({
       balance: data.balance ?? 0,
