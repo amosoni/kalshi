@@ -203,17 +203,24 @@ function SignInModal({ open, onClose, onSignUp }: { open: boolean; onClose: () =
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    if (!usernameOrEmail) {
+      setError('请输入用户名或邮箱');
+      return;
+    }
+    if (!password) {
+      setError('请输入密码');
+      return;
+    }
+    setLoading(true);
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usernameOrEmail, password }),
+      const res = await signIn('credentials', {
+        usernameOrEmail,
+        password,
+        redirect: false,
       });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Login failed');
+      if (res?.error) {
+        throw new Error(res.error);
       }
       onClose();
       window.location.reload();
@@ -233,32 +240,17 @@ function SignInModal({ open, onClose, onSignUp }: { open: boolean; onClose: () =
           <button
             type="button"
             onClick={() => {
-              onClose(); // 先关闭弹窗
-              setTimeout(() => signIn('google'), 100); // 再发起 Google 登录
+              onClose();
+              setTimeout(() => signIn('google'), 100);
             }}
             className="flex items-center px-6 py-3 bg-white border border-gray-200 rounded-xl shadow hover:shadow-md transition-all text-base font-medium mb-4"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
-              <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-              <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
-              <g id="SVGRepo_iconCarrier">
-                <path d="M21.805 10.023h-9.765v3.977h5.617c-.242 1.242-1.453 3.648-5.617 3.648-3.383 0-6.148-2.797-6.148-6.148s2.765-6.148 6.148-6.148c1.922 0 3.211.82 3.953 1.523l2.703-2.625c-1.711-1.57-3.922-2.523-6.656-2.523-5.523 0-10 4.477-10 10s4.477 10 10 10c5.742 0 9.547-4.023 9.547-9.695 0-.648-.07-1.148-.156-1.352z" fill="#FFC107"></path>
-                <path d="M3.152 7.345l3.281 2.406c.898-1.367 2.367-2.227 4.07-2.227 1.172 0 2.242.406 3.078 1.078l2.922-2.844c-1.711-1.57-3.922-2.523-6.656-2.523-3.789 0-7.008 2.461-8.242 5.836z" fill="#FF3D00"></path>
-                <path d="M23.994 12.225c0-.789-.07-1.367-.156-1.352h-9.765v3.977h5.617c-.242 1.242-1.453 3.648-5.617 3.648-2.867 0-5.242-2.016-5.953-4.672l-3.281 2.531c1.234 3.375 4.453 5.836 8.242 5.836 4.742 0 8.547-4.023 8.547-9.695z" fill="#4CAF50"></path>
-                <path d="M12.07 22c2.734 0 5.047-.898 6.742-2.453l-3.219-2.625c-.898.617-2.047.977-3.523.977-2.734 0-5.047-.898-6.742-2.453l3.219-2.625c.898.617 2.047.977 3.523.977z" fill="#1976D2"></path>
-              </g>
-            </svg>
             Sign in with Google
           </button>
-          <div className="flex items-center w-full my-4">
-            <div className="flex-1 h-px bg-gray-200" />
-            <span className="mx-2 text-gray-400 text-sm">or</span>
-            <div className="flex-1 h-px bg-gray-200" />
-          </div>
           <form className="w-full flex flex-col gap-3" onSubmit={handleLogin}>
             <input
               type="text"
-              placeholder="Email address or username"
+              placeholder="Username or Email"
               className="border rounded px-4 py-2 w-full"
               value={usernameOrEmail}
               onChange={e => setUsernameOrEmail(e.target.value)}

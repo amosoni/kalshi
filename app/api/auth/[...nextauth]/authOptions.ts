@@ -10,27 +10,46 @@ export const authOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        usernameOrEmail: { label: 'Username or Email', type: 'text' },
+        username: { label: 'Username', type: 'text' },
+        email: { label: 'Email', type: 'text', optional: true },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials) {
           return null;
         }
-        // 调用本地 API
-        const res = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            usernameOrEmail: credentials.usernameOrEmail,
-            password: credentials.password,
-          }),
-        });
-        const user = await res.json();
-        if (res.ok && user && !user.error) {
-          return user;
+        // 兼容 email、username 字段
+        const usernameOrEmail = credentials.email?.trim() || credentials.username?.trim() || '';
+        const body = { usernameOrEmail, password: credentials.password };
+        const fetchUrl = `${process.env.NEXTAUTH_URL}/api/login`;
+        console.error('NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
+        console.error('fetchUrl:', fetchUrl);
+        try {
+          const res = await fetch(fetchUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          let result = null;
+          try {
+            result = await res.json();
+          } catch (e) {
+            console.error('LOGIN API JSON PARSE ERROR:', e);
+          }
+          console.error('LOGIN API RESULT:', res.status, result);
+          if (res.ok && result && result.success && result.user) {
+            return {
+              id: result.user.id,
+              username: result.user.username,
+              email: result.user.email,
+              image: result.user.image || null,
+            };
+          }
+          return null;
+        } catch (err) {
+          console.error('LOGIN API FETCH ERROR:', err);
+          return null;
         }
-        return null;
       },
     }),
   ],

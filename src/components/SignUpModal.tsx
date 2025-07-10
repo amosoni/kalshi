@@ -1,4 +1,5 @@
 import { Dialog } from '@headlessui/react';
+import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 
 export default function SignUpModal({ open, onClose, onSignIn }: { open: boolean; onClose: () => void; onSignIn: () => void }) {
@@ -7,33 +8,36 @@ export default function SignUpModal({ open, onClose, onSignIn }: { open: boolean
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email, password }),
       });
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        data = { error: 'Invalid response' };
+      }
       if (!res.ok) {
         throw new Error(data.error || 'Registration failed');
       }
-      // 注册成功后自动登录
-      const loginRes = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usernameOrEmail: email, password }),
-      });
-      const loginData = await loginRes.json();
-      if (!loginRes.ok) {
-        throw new Error(loginData.error || 'Auto login failed');
-      }
-      onClose();
-      window.location.reload();
+      setSuccess(true);
+      setTimeout(async () => {
+        await signIn('credentials', {
+          usernameOrEmail: email.trim() || username.trim(),
+          password,
+          redirect: true,
+          callbackUrl: '/',
+        });
+      }, 1000);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -74,10 +78,11 @@ export default function SignUpModal({ open, onClose, onSignIn }: { open: boolean
               required
             />
             {error && <div className="text-red-500 text-sm mt-1">{error}</div>}
+            {success && <div className="text-green-600 text-sm mt-1">注册并登录成功，正在跳转...</div>}
             <button
               type="submit"
               className="mt-2 px-6 py-2 bg-gray-800 text-white rounded font-medium disabled:opacity-60"
-              disabled={loading}
+              disabled={loading || success}
             >
               {loading ? 'Registering...' : 'Continue'}
             </button>
