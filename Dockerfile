@@ -9,7 +9,7 @@ WORKDIR /app
 
 # 复制依赖文件并安装依赖
 COPY package*.json ./
-RUN npm install --production
+RUN npm install
 
 # 复制项目全部代码
 COPY . .
