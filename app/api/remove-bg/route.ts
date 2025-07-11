@@ -57,7 +57,8 @@ export async function POST(req: NextRequest) {
       try {
         const out = execSync(`"${ffprobePath}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`).toString();
         return Math.ceil(Number.parseFloat(out));
-      } catch {
+      } catch (err: any) {
+        console.error('ffprobe execSync error:', err.message, err.stack);
         return 0;
       }
     };
