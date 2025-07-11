@@ -14,6 +14,8 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [modalOpen, setModalOpen] = useState(false); // 登录弹窗
   const [signUpOpen, setSignUpOpen] = useState(false); // 注册弹窗
+  const [usernameOrEmail, setUsernameOrEmail] = useState('');
+  const [password, setPassword] = useState('');
   const sessionData = useSession();
   const session = sessionData?.data;
   const { points: _points } = usePoints();
@@ -178,6 +180,10 @@ export default function Navbar() {
                 setModalOpen(false);
                 setSignUpOpen(true);
               }}
+              usernameOrEmail={usernameOrEmail}
+              setUsernameOrEmail={setUsernameOrEmail}
+              password={password}
+              setPassword={setPassword}
             />
             <SignUpModal
               open={signUpOpen}
@@ -195,9 +201,15 @@ export default function Navbar() {
 }
 
 // 新增弹窗登录组件
-function SignInModal({ open, onClose, onSignUp }: { open: boolean; onClose: () => void; onSignUp: () => void }) {
-  const [usernameOrEmail, setUsernameOrEmail] = useState('');
-  const [password, setPassword] = useState('');
+function SignInModal({ open, onClose, onSignUp, usernameOrEmail, setUsernameOrEmail, password, setPassword }: {
+  open: boolean;
+  onClose: () => void;
+  onSignUp: () => void;
+  usernameOrEmail: string;
+  setUsernameOrEmail: (v: string) => void;
+  password: string;
+  setPassword: (v: string) => void;
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 

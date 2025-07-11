@@ -10,16 +10,16 @@ export const authOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        username: { label: 'Username', type: 'text' },
-        email: { label: 'Email', type: 'text', optional: true },
+        usernameOrEmail: { label: 'Username or Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials) {
           return null;
         }
+        console.error('authorize credentials:', credentials);
         // 兼容 email、username 字段
-        const usernameOrEmail = credentials.email?.trim() || credentials.username?.trim() || '';
+        const usernameOrEmail = credentials.usernameOrEmail?.trim() || '';
         const body = { usernameOrEmail, password: credentials.password };
         const fetchUrl = `${process.env.NEXTAUTH_URL}/api/login`;
         console.error('NEXTAUTH_URL:', process.env.NEXTAUTH_URL);

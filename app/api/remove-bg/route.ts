@@ -76,7 +76,15 @@ export async function POST(req: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, videoDuration: durationSec }),
     });
-    const renderData = await renderResp.json() as { valid: boolean; reason?: string };
+    const text = await renderResp.text();
+    console.error('remove-bg 状态码:', renderResp.status);
+    console.error('remove-bg 返回内容:', text);
+    let renderData;
+    try {
+      renderData = JSON.parse(text) as { valid: boolean; reason?: string };
+    } catch (e) {
+      return new Response(JSON.stringify({ error: '视频处理接口返回非JSON内容' }), { status: 500 });
+    }
     if (!renderData.valid) {
       return new Response(JSON.stringify({ error: renderData.reason || '视频时长校验失败' }), { status: 429 });
     }
