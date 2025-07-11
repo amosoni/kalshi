@@ -78,7 +78,7 @@ export default function SignUpModal({ open, onClose, onSignIn }: { open: boolean
               required
             />
             {error && <div className="text-red-500 text-sm mt-1">{error}</div>}
-            {success && <div className="text-green-600 text-sm mt-1">注册并登录成功，正在跳转...</div>}
+            {success && <div className="text-green-600 text-sm mt-1">Sign up and login successful, redirecting...</div>}
             <button
               type="submit"
               className="mt-2 px-6 py-2 bg-gray-800 text-white rounded font-medium disabled:opacity-60"

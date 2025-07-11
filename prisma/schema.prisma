@@ -66,13 +66,10 @@ model VerificationToken {
 // 你可以在这里继续添加你原有的业务表（如 points、orders 等）
 
 model Points {
-  id           String   @id @default(cuid())
-  user_id      String   @unique
-  balance      Int      // 单位：秒
-  total_earned Int
-  total_spent  Int
-  updatedAt    DateTime @updatedAt
-  createdAt    DateTime @default(now())
+  user_id      String   @id
+  balance      Int      @default(0)
+  total_earned Int      @default(0)
+  total_spent  Int      @default(0)
 }
 
 model PointsLog {
