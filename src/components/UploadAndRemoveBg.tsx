@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { apiUrl } from '@/utils/api';
 import { useUser } from '../hooks/useUser';
 
 const COLORS = [
@@ -40,7 +41,7 @@ export default function UploadAndRemoveBg({ title = 'Upload Video', glass = fals
       if (user?.id) {
         formData.append('user_id', user.id);
       }
-      const res = await fetch('/api/remove-bg', {
+      const res = await fetch(apiUrl('/api/remove-bg'), {
         method: 'POST',
         body: formData,
       });

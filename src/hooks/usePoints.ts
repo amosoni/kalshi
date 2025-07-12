@@ -1,5 +1,6 @@
 import { signIn } from 'next-auth/react';
 import { useEffect, useRef, useState } from 'react';
+import { apiUrl } from '@/utils/api';
 import { useUser } from './useUser';
 
 export type PointsData = {
@@ -33,7 +34,7 @@ export function usePoints() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/points');
+      const response = await fetch(apiUrl('/api/points'));
       if (!response.ok) {
         throw new Error('Failed to fetch points');
       }
@@ -59,10 +60,10 @@ export function usePoints() {
       throw new Error('User not authenticated');
     }
 
-    const response = await fetch('/api/points/consume', {
+    const response = await fetch(apiUrl('/api/points/consume'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount, description }),
+      body: JSON.stringify({ user_id: user.id, amount, description }),
     });
 
     if (!response.ok) {
@@ -99,7 +100,7 @@ export function usePointsLog() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/points/log');
+      const response = await fetch(apiUrl('/api/points/log'));
       if (!response.ok) {
         throw new Error('Failed to fetch points log');
       }
@@ -137,7 +138,7 @@ export function useRecharge() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/creem/checkout', {
+      const response = await fetch(apiUrl('/api/creem/checkout'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user.id, product_id }),

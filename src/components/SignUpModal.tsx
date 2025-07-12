@@ -1,6 +1,7 @@
 import { Dialog } from '@headlessui/react';
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
+import { apiUrl } from '@/utils/api';
 
 export default function SignUpModal({ open, onClose, onSignIn }: { open: boolean; onClose: () => void; onSignIn: () => void }) {
   const [username, setUsername] = useState('');
@@ -15,10 +16,10 @@ export default function SignUpModal({ open, onClose, onSignIn }: { open: boolean
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/register', {
+      const res = await fetch(apiUrl('/api/register'), {
         method: 'POST',
+        body: JSON.stringify({ email, password }),
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password }),
       });
       let data;
       try {
