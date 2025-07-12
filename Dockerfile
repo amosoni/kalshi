@@ -14,6 +14,10 @@ RUN npm install
 # 复制项目全部代码（包括 prisma/schema.prisma）
 COPY . .
 
+# 设置构建参数和环境变量
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+
 # 构建生产环境
 RUN npm run build
 
