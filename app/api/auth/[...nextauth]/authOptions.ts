@@ -1,7 +1,10 @@
+import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
+import { prisma } from '../../../src/libs/prisma';
 
 export const authOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -54,7 +57,7 @@ export const authOptions = {
     }),
   ],
   session: {
-    strategy: 'jwt' as const,
+    strategy: 'database',
   },
   cookies: {
     sessionToken: {

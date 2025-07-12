@@ -11,6 +11,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
+# 构建生产环境
+RUN npm run build
+
 # 复制项目全部代码
 COPY . .
 
