@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
-import { supabase } from '@/libs/supabase';
+// import { supabase } from '@/libs/supabase';
 import { authOptions } from '../../../app/api/auth/[...nextauth]/authOptions';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -22,18 +22,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // 获取积分流水记录
-    const { data: logs, error } = await supabase
-      .from('points_log')
-      .select('*')
-      .eq('user_id', user_id)
-      .order('created_at', { ascending: false })
-      .limit(100);
+    // TODO: 用 Prisma/新方案重写积分日志查询逻辑
+    // const { data: logs, error } = await supabase
+    //   .from('points_log')
+    //   .select('*')
+    //   .eq('user_id', user_id)
+    //   .order('created_at', { ascending: false })
+    //   .limit(100);
 
-    if (error) {
-      return res.status(500).json({ error: 'Failed to fetch points log' });
-    }
+    // if (error) {
+    //   return res.status(500).json({ error: 'Failed to fetch points log' });
+    // }
 
-    return res.status(200).json(logs || []);
+    return res.status(200).json([]); // Placeholder for now
   } catch (error) {
     console.error('Points log error:', error);
     return res.status(500).json({ error: 'Internal server error' });

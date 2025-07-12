@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '@/libs/supabase';
+// import { supabase } from '@/libs/supabase';
+// TODO: 用 Prisma/新方案重写支付失败处理逻辑
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -14,14 +15,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // 更新订单状态为失败
-    const { error: updateError } = await supabase
-      .from('orders')
-      .update({ status: 'failed' })
-      .eq('stripe_session_id', session_id);
+    // const { error: updateError } = await supabase
+    //   .from('orders')
+    //   .update({ status: 'failed' })
+    //   .eq('stripe_session_id', session_id);
 
-    if (updateError) {
-      console.error('Failed to update order status:', updateError);
-    }
+    // if (updateError) {
+    //   console.error('Failed to update order status:', updateError);
+    // }
 
     return res.status(200).json({
       success: false,

@@ -1,15 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import fs from 'node:fs';
-import { createClient } from '@supabase/supabase-js';
+// TODO: Supabase 相关上传逻辑已弃用，待替换为新存储方案
+// import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import formidable from 'formidable';
 
 dotenv.config({ path: '.env.local' });
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+// const supabase = createClient(
+//   process.env.NEXT_PUBLIC_SUPABASE_URL!,
+//   process.env.SUPABASE_SERVICE_ROLE_KEY!,
+// );
 
 export const config = { api: { bodyParser: false } };
 
@@ -29,23 +30,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const fileStream = fs.createReadStream(file.filepath);
-    const { error } = await supabase.storage
-      .from(process.env.SUPABASE_STORAGE_BUCKET!)
-      .upload(`videos/${file.originalFilename}`, fileStream, {
-        contentType: file.mimetype || 'video/mp4',
-      });
-
-    if (error) {
-      return res.status(500).json({ error: 'Supabase 上传失败', detail: error.message });
-    }
-
-    // 获取公开访问 URL
-    const { data: publicUrl } = supabase
-      .storage
-      .from(process.env.SUPABASE_STORAGE_BUCKET!)
-      .getPublicUrl(`videos/${file.originalFilename}`);
-
-    res.status(200).json({ url: publicUrl.publicUrl });
+    // 本地存储上传
+    const uploadPath = `public/uploads/${file.originalFilename}`;
+    fs.copyFileSync(file.filepath, uploadPath);
+    const fileUrl = `/uploads/${file.originalFilename}`;
+    res.status(200).json({ url: fileUrl });
   });
 }

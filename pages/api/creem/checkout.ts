@@ -2,8 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { getServerSession } from 'next-auth';
 import fetchOrig from 'node-fetch';
-import { CREEM_PRODUCT_CONFIG } from '@/constants/creemProducts';
-import { supabase } from '@/libs/supabase';
+// import { supabase } from '@/libs/supabase';
+// TODO: 用 Prisma/新方案重写订单创建和支付逻辑
 import { authOptions } from '../../../app/api/auth/[...nextauth]/authOptions';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -53,15 +53,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       id?: string;
       checkout_url?: string;
     };
-    const config = CREEM_PRODUCT_CONFIG[product_id] || { minutes: 0, price: 0 };
 
-    await supabase.from('orders').insert({
-      user_id: userId,
-      stripe_session_id: data.checkout_id || data.session_id || data.id,
-      amount: config.minutes,
-      price: config.price,
-      status: 'pending',
-    });
+    // await supabase.from('orders').insert({
+    //   user_id: userId,
+    //   stripe_session_id: data.checkout_id || data.session_id || data.id,
+    //   amount: config.minutes,
+    //   price: config.price,
+    //   status: 'pending',
+    // });
 
     return res.status(200).json({ url: data.checkout_url });
   } catch (error) {

@@ -4,12 +4,14 @@ import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { createClient } from '@supabase/supabase-js';
+// TODO: Supabase 相关逻辑已弃用，待替换为新存储/积分方案
+// import { createClient } from '@supabase/supabase-js';
 import ffprobeStatic from 'ffprobe-static';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { getServerSession } from 'next-auth';
 import fetchOrig from 'node-fetch';
 import { v4 as uuidv4 } from 'uuid';
+import { prisma } from '@/libs/prisma';
 import { authOptions } from '../auth/[...nextauth]/authOptions';
 
 export const runtime = 'nodejs';
@@ -18,10 +20,11 @@ export const runtime = 'nodejs';
 
 const fetch = (url: any, options: any) => fetchOrig(url, options);
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+// TODO: Supabase 相关逻辑已弃用，待替换为新存储/积分方案
+// const supabase = createClient(
+//   process.env.NEXT_PUBLIC_SUPABASE_URL!,
+//   process.env.SUPABASE_SERVICE_ROLE_KEY!,
+// );
 
 const proxyUrl = process.env.PROXY_URL; // 例：http://127.0.0.1:7899
 const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
@@ -57,7 +60,6 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const fileName = `${uuidv4()}-${file.name}`;
-    const fileType = file.type || 'video/mp4';
 
     const backgroundColor = formData.get('background_color') as string || '#FFFFFF';
 
@@ -105,36 +107,17 @@ export async function POST(req: NextRequest) {
     }
 
     // ====== 积分校验 ======
-    const { data: pointsData, error: pointsError } = await supabase
-      .from('points')
-      .select('balance')
-      .eq('user_id', userId)
-      .single();
-    if (pointsError) {
-      return new Response(JSON.stringify({ error: 'Failed to fetch points' }), { status: 500, headers: CORS_HEADERS });
-    }
-    const currentBalance = pointsData?.balance || 0;
-    const cost = durationSec / 60; // 精确到秒计费，1积分=60秒
+    // 积分校验
+    const userPoints = await prisma.points.findUnique({ where: { user_id: userId } });
+    const currentBalance = userPoints?.balance || 0;
+    const cost = durationSec / 60;
     if (currentBalance < cost) {
       return new Response(JSON.stringify({ error: 'Insufficient points', currentBalance, requiredAmount: cost }), { status: 403, headers: CORS_HEADERS });
     }
-
-    // 2. 上传到 Supabase Storage
-    const { error: uploadError } = await supabase.storage
-      .from(process.env.SUPABASE_STORAGE_BUCKET!)
-      .upload(`videos/${fileName}`, buffer, {
-        contentType: fileType,
-        upsert: true,
-      });
-    if (uploadError) {
-      console.error('Supabase 上传失败:', uploadError);
-      return new Response(JSON.stringify({ error: 'Supabase 上传失败', detail: uploadError.message }), { status: 500, headers: CORS_HEADERS });
-    }
-    const { data: publicUrlData } = supabase
-      .storage
-      .from(process.env.SUPABASE_STORAGE_BUCKET!)
-      .getPublicUrl(`videos/${fileName}`);
-    const fileUrl = publicUrlData.publicUrl;
+    // 本地存储上传
+    const uploadPath = path.join(process.cwd(), 'public', 'uploads', fileName);
+    fs.writeFileSync(uploadPath, buffer);
+    const fileUrl = `/uploads/${fileName}`;
 
     // 3. 调用 Replicate AI
     const replicateRes = await fetch('https://api.replicate.com/v1/predictions', {
@@ -167,13 +150,7 @@ export async function POST(req: NextRequest) {
 
     if (result.status === 'succeeded') {
       // 扣除积分
-      const { error: updateError } = await supabase
-        .from('points')
-        .update({ balance: currentBalance - cost })
-        .eq('user_id', userId);
-      if (updateError) {
-        return new Response(JSON.stringify({ error: 'Failed to deduct points' }), { status: 500, headers: CORS_HEADERS });
-      }
+      await prisma.points.update({ where: { user_id: userId }, data: { balance: { decrement: cost } } });
       return new Response(JSON.stringify({ resultUrl: result.output }), { status: 200, headers: CORS_HEADERS });
     } else {
       console.error('AI处理失败:', result);
