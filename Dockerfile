@@ -11,11 +11,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
+# 复制项目全部代码（包括 prisma/schema.prisma）
+COPY . .
+
 # 构建生产环境
 RUN npm run build
-
-# 复制项目全部代码
-COPY . .
 
 # 暴露端口（如有需要可修改）
 EXPOSE 3001
