@@ -12,11 +12,11 @@ export default function SignInButton() {
           Welcome,
           {session.user?.name || session.user?.email}
         </span>
-        <button onClick={() => signOut()}>Sign out</button>
+        <button type="button" onClick={() => signOut()}>Sign out</button>
       </div>
     );
   }
   return (
-    <button onClick={() => signIn('google')}>Sign in with Google</button>
+    <button type="button" onClick={() => signIn('google')}>Sign in with Google</button>
   );
 }

@@ -54,8 +54,7 @@ export function usePoints() {
       lastUserId.current = user.id;
       fetchPoints();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [user?.id, fetchPoints]);
 
   const consumePoints = async (amount: number, description: string) => {
     if (!user) {

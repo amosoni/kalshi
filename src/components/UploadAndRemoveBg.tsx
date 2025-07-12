@@ -182,7 +182,8 @@ export default function UploadAndRemoveBg({ title = 'Upload Video', glass = fals
             onClick={() => {
               if (!user?.id) {
                 // clerk.openSignIn(); // Removed Clerk
-                alert('Please sign in to process videos.');
+                // TODO: Replace with UI notification
+                console.warn('Please sign in to process videos.');
                 return;
               }
               handleProcess();
@@ -223,18 +224,10 @@ export default function UploadAndRemoveBg({ title = 'Upload Video', glass = fals
                 Your browser does not support the video tag.
               </video>
             </div>
-            <button
-              type="button"
-              onClick={handleDownload}
-              className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl transition-colors duration-300 mb-2"
-            >
+            <button type="button" onClick={handleDownload} className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-xl transition-colors duration-300 mb-2">
               Download Video
             </button>
-            <button
-              type="button"
-              onClick={() => setProcessedVideoUrl(null)}
-              className="w-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl py-3 px-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-300 mb-2"
-            >
+            <button type="button" onClick={() => setProcessedVideoUrl(null)} className="w-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl py-3 px-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-300 mb-2">
               Process Another
             </button>
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mt-2 w-full">

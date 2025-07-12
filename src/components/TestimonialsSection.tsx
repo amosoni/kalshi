@@ -7,6 +7,7 @@ export default function TestimonialsSection() {
 
   const testimonials = [
     {
+      id: 'testimonial-1',
       name: 'John Smith',
       role: 'Content Creator',
       company: 'YouTube',
@@ -14,6 +15,7 @@ export default function TestimonialsSection() {
       content: 'This tool is amazing! Upload a video, pick a background color, and get results in seconds. Super easy! The AI is accurate and fast, even with large files. Saved me tons of editing time!',
     },
     {
+      id: 'testimonial-2',
       name: 'Emily Johnson',
       role: 'Video Editor',
       company: 'Creative Studio',
@@ -21,6 +23,7 @@ export default function TestimonialsSection() {
       content: 'As a professional editor, I\'m impressed by the AI\'s precision and speed. It handles complex backgrounds better than any tool I\'ve used.',
     },
     {
+      id: 'testimonial-3',
       name: 'Michael Lee',
       role: 'Marketing Director',
       company: 'Tech Company',
@@ -28,6 +31,7 @@ export default function TestimonialsSection() {
       content: 'We use it for all our product videos. The quality is excellent and it saves us thousands in post-production costs. Highly recommended!',
     },
     {
+      id: 'testimonial-4',
       name: 'Sophia Chen',
       role: 'Entrepreneur',
       company: 'Startup',
@@ -50,18 +54,18 @@ export default function TestimonialsSection() {
             <div className="relative">
               {/* Testimonial Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {testimonials.map((testimonial, index) => (
+                {testimonials.map(testimonial => (
                   <div
-                    key={testimonial.name}
+                    key={testimonial.id}
                     className={`bg-white dark:bg-gray-900 rounded-lg p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
-                      index === activeIndex ? 'ring-2 ring-blue-500' : ''
+                      activeIndex === testimonials.findIndex(t => t.id === testimonial.id) ? 'ring-2 ring-blue-500' : ''
                     }`}
-                    onClick={() => setActiveIndex(index)}
+                    onClick={() => setActiveIndex(testimonials.findIndex(t => t.id === testimonial.id))}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
-                        setActiveIndex(index);
+                        setActiveIndex(testimonials.findIndex(t => t.id === testimonial.id));
                       }
                     }}
                   >

@@ -1,7 +1,7 @@
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
-import { prisma } from '../../../src/libs/prisma';
+import { prisma } from '@/libs/prisma';
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -57,7 +57,7 @@ export const authOptions = {
     }),
   ],
   session: {
-    strategy: 'database',
+    strategy: 'database' as const,
   },
   cookies: {
     sessionToken: {

@@ -12,6 +12,23 @@ const baseConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   serverExternalPackages: ['@electric-sql/pglite', 'ffprobe-static'],
+  webpack: (config, { isServer }) => {
+    // 解决 Windows 临时目录权限问题
+    config.watchOptions = {
+      poll: 1000,
+      aggregateTimeout: 300,
+    };
+
+    // 设置临时目录到项目内部
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      };
+    }
+
+    return config;
+  },
 };
 
 // Initialize the Next-Intl plugin
