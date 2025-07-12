@@ -20,6 +20,7 @@ export default function SignUpModal({ open, onClose, onSignIn }: { open: boolean
         method: 'POST',
         body: JSON.stringify({ email, password }),
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
       });
       let data;
       try {

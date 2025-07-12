@@ -26,12 +26,26 @@ const supabase = createClient(
 const proxyUrl = process.env.PROXY_URL; // 例：http://127.0.0.1:7899
 const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': 'https://kalshiai.org',
+  'Access-Control-Allow-Credentials': 'true',
+  'Access-Control-Allow-Methods': 'POST,OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+};
+
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: CORS_HEADERS,
+  });
+}
+
 export async function POST(req: NextRequest) {
   // 用 NextAuth session 获取 userId
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
   if (!userId) {
-    return new Response(JSON.stringify({ error: 'Not authenticated' }), { status: 401 });
+    return new Response(JSON.stringify({ error: 'Not authenticated' }), { status: 401, headers: CORS_HEADERS });
   }
   try {
     // 1. 解析 multipart/form-data
@@ -65,10 +79,10 @@ export async function POST(req: NextRequest) {
     const durationSec = getDuration(tempPath);
     fs.unlinkSync(tempPath);
     if (durationSec <= 0) {
-      return new Response(JSON.stringify({ error: 'Failed to get video duration' }), { status: 400 });
+      return new Response(JSON.stringify({ error: 'Failed to get video duration' }), { status: 400, headers: CORS_HEADERS });
     }
     if (durationSec > 30) {
-      return new Response(JSON.stringify({ error: '免费用户每次最多处理30秒视频' }), { status: 429 });
+      return new Response(JSON.stringify({ error: '免费用户每次最多处理30秒视频' }), { status: 429, headers: CORS_HEADERS });
     }
 
     // ====== Render 后端时长校验 ======
@@ -87,7 +101,7 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ error: '视频处理接口返回非JSON内容' }), { status: 500 });
     }
     if (!renderData.valid) {
-      return new Response(JSON.stringify({ error: renderData.reason || '视频时长校验失败' }), { status: 429 });
+      return new Response(JSON.stringify({ error: renderData.reason || '视频时长校验失败' }), { status: 429, headers: CORS_HEADERS });
     }
 
     // ====== 积分校验 ======
@@ -97,12 +111,12 @@ export async function POST(req: NextRequest) {
       .eq('user_id', userId)
       .single();
     if (pointsError) {
-      return new Response(JSON.stringify({ error: 'Failed to fetch points' }), { status: 500 });
+      return new Response(JSON.stringify({ error: 'Failed to fetch points' }), { status: 500, headers: CORS_HEADERS });
     }
     const currentBalance = pointsData?.balance || 0;
     const cost = durationSec / 60; // 精确到秒计费，1积分=60秒
     if (currentBalance < cost) {
-      return new Response(JSON.stringify({ error: 'Insufficient points', currentBalance, requiredAmount: cost }), { status: 403 });
+      return new Response(JSON.stringify({ error: 'Insufficient points', currentBalance, requiredAmount: cost }), { status: 403, headers: CORS_HEADERS });
     }
 
     // 2. 上传到 Supabase Storage
@@ -114,7 +128,7 @@ export async function POST(req: NextRequest) {
       });
     if (uploadError) {
       console.error('Supabase 上传失败:', uploadError);
-      return new Response(JSON.stringify({ error: 'Supabase 上传失败', detail: uploadError.message }), { status: 500 });
+      return new Response(JSON.stringify({ error: 'Supabase 上传失败', detail: uploadError.message }), { status: 500, headers: CORS_HEADERS });
     }
     const { data: publicUrlData } = supabase
       .storage
@@ -158,15 +172,15 @@ export async function POST(req: NextRequest) {
         .update({ balance: currentBalance - cost })
         .eq('user_id', userId);
       if (updateError) {
-        return new Response(JSON.stringify({ error: 'Failed to deduct points' }), { status: 500 });
+        return new Response(JSON.stringify({ error: 'Failed to deduct points' }), { status: 500, headers: CORS_HEADERS });
       }
-      return new Response(JSON.stringify({ resultUrl: result.output }), { status: 200 });
+      return new Response(JSON.stringify({ resultUrl: result.output }), { status: 200, headers: CORS_HEADERS });
     } else {
       console.error('AI处理失败:', result);
-      return new Response(JSON.stringify({ error: 'AI处理失败' }), { status: 500 });
+      return new Response(JSON.stringify({ error: 'AI处理失败' }), { status: 500, headers: CORS_HEADERS });
     }
   } catch (err: any) {
     console.error('remove-bg error:', err);
-    return new Response(JSON.stringify({ error: '服务器异常', detail: String(err) }), { status: 500 });
+    return new Response(JSON.stringify({ error: '服务器异常', detail: String(err) }), { status: 500, headers: CORS_HEADERS });
   }
 }

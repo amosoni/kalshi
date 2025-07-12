@@ -44,6 +44,7 @@ export default function UploadAndRemoveBg({ title = 'Upload Video', glass = fals
       const res = await fetch(apiUrl('/api/remove-bg'), {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
       const data = await res.json();
       if (res.ok && data.resultUrl) {

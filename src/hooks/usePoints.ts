@@ -34,7 +34,9 @@ export function usePoints() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(apiUrl('/api/points'));
+      const response = await fetch(apiUrl('/api/points'), {
+        credentials: 'include',
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch points');
       }
@@ -64,6 +66,7 @@ export function usePoints() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: user.id, amount, description }),
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -100,7 +103,9 @@ export function usePointsLog() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(apiUrl('/api/points/log'));
+      const response = await fetch(apiUrl('/api/points/log'), {
+        credentials: 'include',
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch points log');
       }
@@ -142,6 +147,7 @@ export function useRecharge() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user.id, product_id }),
+        credentials: 'include',
       });
 
       if (!response.ok) {

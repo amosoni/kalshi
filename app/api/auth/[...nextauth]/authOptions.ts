@@ -56,6 +56,17 @@ export const authOptions = {
   session: {
     strategy: 'jwt' as const,
   },
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'none' as const,
+        path: '/',
+        secure: true,
+      },
+    },
+  },
   callbacks: {
     async jwt({ token, user }: { token: any; user?: any }) {
       if (user) {
@@ -69,7 +80,7 @@ export const authOptions = {
     },
     async session({ session, token }: { session: any; token: any }) {
       if (token) {
-        (session.user as any) = {
+        session.user = {
           id: token.id,
           username: token.username,
           email: token.email,
