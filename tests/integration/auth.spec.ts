@@ -17,9 +17,10 @@ test.describe('Auth/Register/Login', () => {
 
     const json = await res.json();
 
-    expect(json).toHaveProperty('id');
-    expect(json).toHaveProperty('username', username);
-    expect(json).toHaveProperty('email', email);
+    expect(json).toHaveProperty('success', true);
+    expect(json.user).toHaveProperty('id');
+    expect(json.user).toHaveProperty('username', username);
+    expect(json.user).toHaveProperty('email', email);
   });
 
   test('should login with registered user', async ({ request }) => {

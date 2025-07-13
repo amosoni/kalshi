@@ -17,6 +17,11 @@ export const authOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        console.error('===DEBUG ENV===', {
+          NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+          NODE_ENV: process.env.NODE_ENV,
+          ALL_ENV: Object.keys(process.env).filter(k => k.toLowerCase().includes('auth') || k.toLowerCase().includes('api') || k.toLowerCase().includes('base')),
+        });
         if (!credentials) {
           return null;
         }
