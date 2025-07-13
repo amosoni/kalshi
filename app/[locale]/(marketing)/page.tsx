@@ -11,7 +11,7 @@ import TestimonialsSection from '@/components/TestimonialsSection';
 import UploadAndRemoveBg from '@/components/UploadAndRemoveBg';
 
 type IIndexProps = {
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
 };
 
 export async function generateMetadata(_props: IIndexProps) {
@@ -28,7 +28,7 @@ export async function generateMetadata(_props: IIndexProps) {
 
 // 全新首页主结构，基于TailGrids Play模板设计，匹配实际功能
 export default async function Index(props: IIndexProps) {
-  const { locale } = await props.params;
+  const { locale } = props.params;
   setRequestLocale(locale);
 
   return (

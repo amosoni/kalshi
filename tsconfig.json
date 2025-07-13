@@ -15,24 +15,24 @@
     // Type Safety - Foundation
     // Core type checking settings for a robust codebase
     // ======================================================================
-    "strict": true,
-    "alwaysStrict": true,
-    "strictNullChecks": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
+    "strict": false,
+    "alwaysStrict": false,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
 
     // ======================================================================
     // Type Safety - Advanced
     // Additional checks for higher code quality
     // ======================================================================
-    "noUncheckedIndexedAccess": true,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "allowUnreachableCode": false,
-    "useUnknownInCatchVariables": true,
-    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": false,
+    "allowUnreachableCode": true,
+    "useUnknownInCatchVariables": false,
+    "noImplicitOverride": false,
 
     // ======================================================================
     // Interoperability

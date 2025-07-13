@@ -1,5 +1,5 @@
 type IUserProfilePageProps = {
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
 };
 
 export default async function UserProfilePage({ params: _params }: IUserProfilePageProps) {

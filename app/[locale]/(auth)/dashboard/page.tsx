@@ -1,15 +1,12 @@
 import { Hello } from '@/components/Hello';
 
-export async function generateMetadata(_props: {
-  params: Promise<{ locale: string }>;
-}) {
-  // const t = await getTranslations({
-  //   locale,
-  //   namespace: 'Dashboard',
-  // });
+type IDashboardProps = {
+  params: { locale: string };
+};
 
+export async function generateMetadata(_props: IDashboardProps) {
   return {
-    title: 'Dashboard', // Fallback title
+    title: 'Dashboard',
   };
 }
 

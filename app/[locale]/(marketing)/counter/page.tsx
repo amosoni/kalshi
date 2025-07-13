@@ -5,9 +5,9 @@ import { CounterForm } from '@/components/CounterForm';
 import { CurrentCount } from '@/components/CurrentCount';
 
 export async function generateMetadata(_props: {
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
 }) {
-  // const { locale } = await props.params;
+  // const { locale } = props.params;
   // const t = await getTranslations({
   //   locale,
   //   namespace: 'Counter',
