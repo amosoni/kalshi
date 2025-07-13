@@ -18,7 +18,7 @@ export default function SignUpModal({ open, onClose, onSignIn }: { open: boolean
     try {
       const res = await fetch(apiUrl('/api/register'), {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, email, password }), // 修正：加上 username
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
       });
