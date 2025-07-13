@@ -32,7 +32,7 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# 忽略环境变量文件，防止敏感信息泄露
+# 环境变量文件
 .env
 .env.local
 .env.production
