@@ -5,18 +5,36 @@ import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': 'https://kalshiai.org',
+      'Access-Control-Allow-Methods': 'POST,OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Credentials': 'true',
+    },
+  });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { username, email, password } = await req.json();
     if (!username || !email || !password) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      const res = NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
+      res.headers.set('Access-Control-Allow-Credentials', 'true');
+      return res;
     }
     // 检查用户是否已存在
     const exist = await prisma.user.findFirst({
       where: { OR: [{ username }, { email }] },
     });
     if (exist) {
-      return NextResponse.json({ error: 'User already exists' }, { status: 400 });
+      const res = NextResponse.json({ error: 'User already exists' }, { status: 400 });
+      res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
+      res.headers.set('Access-Control-Allow-Credentials', 'true');
+      return res;
     }
     // 加密密码
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -31,8 +49,14 @@ export async function POST(req: NextRequest) {
     await prisma.pointsLog.create({
       data: { user_id: user.id, type: 'register', amount: 100, balance_after: 100 },
     });
-    return NextResponse.json({ success: true, user: { id: user.id, username, email } }, { status: 201 });
+    const res = NextResponse.json({ success: true, user: { id: user.id, username, email } }, { status: 201 });
+    res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
+    res.headers.set('Access-Control-Allow-Credentials', 'true');
+    return res;
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+    const res = NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+    res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
+    res.headers.set('Access-Control-Allow-Credentials', 'true');
+    return res;
   }
 }
