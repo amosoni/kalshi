@@ -33,17 +33,30 @@ export async function POST(req: NextRequest) {
       },
     });
     console.error('LOGIN found user:', user);
-    if (!user || !user.password) {
-      const res = NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    if (!user) {
+      console.error('LOGIN: user not found');
+      const res = NextResponse.json({ error: 'Invalid credentials', reason: 'user_not_found' }, { status: 401 });
+      res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
+      res.headers.set('Access-Control-Allow-Credentials', 'true');
+      return res;
+    }
+    if (!user.password) {
+      console.error('LOGIN: user.password is empty or null');
+      const res = NextResponse.json({ error: 'Invalid credentials', reason: 'no_password' }, { status: 401 });
       res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
       res.headers.set('Access-Control-Allow-Credentials', 'true');
       return res;
     }
     // 校验加密密码
-    const isValid = await bcrypt.compare(password, user.password);
-    console.error('LOGIN password valid:', isValid);
+    let isValid = false;
+    try {
+      isValid = await bcrypt.compare(password, user.password);
+    } catch (e) {
+      console.error('LOGIN: bcrypt.compare error:', e, 'user.password:', user.password);
+    }
+    console.error('LOGIN password valid:', isValid, 'user.password:', user.password);
     if (!isValid) {
-      const res = NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+      const res = NextResponse.json({ error: 'Invalid credentials', reason: 'password_invalid' }, { status: 401 });
       res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
       res.headers.set('Access-Control-Allow-Credentials', 'true');
       return res;
@@ -54,7 +67,8 @@ export async function POST(req: NextRequest) {
     res.headers.set('Access-Control-Allow-Credentials', 'true');
     return res;
   } catch (err: any) {
-    const res = NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+    console.error('LOGIN: catch error', err);
+    const res = NextResponse.json({ error: err.message || 'Internal server error', reason: 'exception' }, { status: 500 });
     res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
     res.headers.set('Access-Control-Allow-Credentials', 'true');
     return res;
