@@ -72,6 +72,7 @@ export const authOptions = {
         sameSite: 'none' as const,
         path: '/',
         secure: true,
+        domain: '.kalshiai.org', // 关键：允许主站和 API 子域共享 Cookie
       },
     },
   },
