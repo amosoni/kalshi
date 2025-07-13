@@ -47,7 +47,7 @@ export default function PricingSection() {
   const [selected, setSelected] = useState<string>(CREEM_PACKAGES[1].key); // Default: Creator
 
   return (
-    <section className="py-20 bg-gray-900 text-white">
+    <section id="pricing" className="py-20 bg-gray-900 text-white">
       <div className="container mx-auto flex flex-col md:flex-row gap-8">
         {/* Subscription Plans */}
         <div className="flex-1 bg-gray-800 rounded-lg p-8 shadow-lg">
