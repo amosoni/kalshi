@@ -41,4 +41,4 @@ RUN npm run build
 EXPOSE 3001
 
 # 启动命令（如有自定义请修改）
-CMD ["npm", "start"] 
+CMD ["node", ".next/standalone/server.js"] 
