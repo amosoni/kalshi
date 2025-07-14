@@ -4,6 +4,7 @@ import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { PrismaClient } from '@prisma/client';
 // TODO: Supabase 相关逻辑已弃用，待替换为新存储/积分方案
 // import { createClient } from '@supabase/supabase-js';
 import ffprobeStatic from 'ffprobe-static';
@@ -44,9 +45,33 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: NextRequest) {
-  // 用 NextAuth session 获取 userId
-  const session = await getServerSession(authOptions);
-  const userId = session?.user?.id;
+  // 优先从 header 读取 session token
+  let sessionToken = '';
+  const authHeader = req.headers.get('authorization');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    sessionToken = authHeader.replace('Bearer ', '').trim();
+  } else {
+    // 兼容 cookie 方式
+    const cookie = req.headers.get('cookie') || '';
+    const match = cookie.match(/next-auth\.session-token=([^;]+)/);
+    if (match) {
+      sessionToken = match[1];
+    }
+  }
+  let userId = null;
+  if (sessionToken) {
+    // 直接查数据库 session 表
+    const prisma = new PrismaClient();
+    const session = await prisma.session.findUnique({ where: { sessionToken } });
+    if (session && session.userId) {
+      userId = session.userId;
+    }
+  }
+  // 兼容 getServerSession 方式（本地调试）
+  if (!userId) {
+    const session = await getServerSession(authOptions);
+    userId = session?.user?.id;
+  }
   if (!userId) {
     return new Response(JSON.stringify({ error: 'Not authenticated' }), { status: 401, headers: CORS_HEADERS });
   }

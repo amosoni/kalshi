@@ -73,12 +73,6 @@ NEXT_PUBLIC_SENTRY_DSN=https://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx@xxxxx.ingest.sen
 LOGTAIL_SOURCE_TOKEN=src_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # ========================================
-# 用户认证 (Clerk)
-# ========================================
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-CLERK_SECRET_KEY=sk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-# ========================================
 # 安全防护 (Arcjet)
 # ========================================
 ARCJET_KEY=aj_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

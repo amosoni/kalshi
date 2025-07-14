@@ -41,10 +41,16 @@ export default function UploadAndRemoveBg({ title = 'Upload Video', glass = fals
       if (user?.id) {
         formData.append('user_id', user.id);
       }
+      // 读取 next-auth.session-token
+      let sessionToken = '';
+      if (typeof window !== 'undefined') {
+        sessionToken = document.cookie.split('; ').find(row => row.startsWith('next-auth.session-token='))?.split('=')[1] || '';
+      }
       const res = await fetch(apiUrl('/api/remove-bg'), {
         method: 'POST',
         body: formData,
         credentials: 'include',
+        headers: sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {},
       });
       const data = await res.json();
       if (res.ok && data.resultUrl) {
