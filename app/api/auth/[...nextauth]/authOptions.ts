@@ -64,18 +64,18 @@ export const authOptions = {
   session: {
     strategy: 'database' as const,
   },
-  cookies: {
-    sessionToken: {
-      name: `__Secure-next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'none' as const,
-        path: '/',
-        secure: true,
-        domain: '.kalshiai.org', // 关键：允许主站和 API 子域共享 Cookie
-      },
-    },
-  },
+  // cookies: {
+  //   sessionToken: {
+  //     name: `__Secure-next-auth.session-token`,
+  //     options: {
+  //       httpOnly: true,
+  //       sameSite: 'none' as const,
+  //       path: '/',
+  //       secure: true,
+  //       domain: '.kalshiai.org',
+  //     },
+  //   },
+  // },
   callbacks: {
     async jwt({ token, user }: { token: any; user?: any }) {
       if (user) {
