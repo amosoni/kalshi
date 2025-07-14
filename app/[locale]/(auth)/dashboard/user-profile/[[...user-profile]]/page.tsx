@@ -1,11 +1,18 @@
 type IUserProfilePageProps = {
-  params: { locale: string };
+  params: Promise<{ 'locale': string; 'user-profile': string[] }>;
 };
 
-export default async function UserProfilePage({ params: _params }: IUserProfilePageProps) {
+export function generateMetadata(_props: IUserProfilePageProps) {
+  return {
+    title: 'User Profile',
+    description: 'User profile page',
+  };
+}
+
+export default function UserProfilePage() {
   return (
-    <div>
-      <h1>User Profile</h1>
+    <div className="py-5 [&_p]:my-6">
+      <p>User Profile Page</p>
     </div>
   );
 }

@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
     let renderData;
     try {
       renderData = JSON.parse(text) as { valid: boolean; reason?: string };
-    } catch (e) {
+    } catch (_e) {
       return new Response(JSON.stringify({ error: '视频处理接口返回非JSON内容' }), { status: 500 });
     }
     if (!renderData.valid) {

@@ -1,38 +1,38 @@
-import { eq } from 'drizzle-orm';
-import { getTranslations } from 'next-intl/server';
-import { headers } from 'next/headers';
-import { db, runMigrations } from '@/libs/DB';
-import { logger } from '@/libs/Logger';
-import { counterSchema } from '@/models/Schema';
+'use client';
 
-export const CurrentCount = async () => {
-  const t = await getTranslations('CurrentCount');
+import { useEffect, useState } from 'react';
 
-  // Skip database operations during build time
-  if (!db) {
-    return (
-      <div>
-        {t('count', { count: 0 })}
-      </div>
-    );
+export const CurrentCount = () => {
+  const [count, setCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const response = await fetch('/api/counter');
+        if (response.ok) {
+          const data = await response.json();
+          setCount(data.count || 0);
+        }
+      } catch (error) {
+        console.error('Failed to fetch count:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCount();
+  }, []);
+
+  if (loading) {
+    return <div>Count: 0</div>;
   }
-
-  // Ensure migrations are run before database operations
-  await runMigrations();
-
-  // `x-e2e-random-id` is used for end-to-end testing to make isolated requests
-  // The default value is 0 when there is no `x-e2e-random-id` header
-  const id = Number((await headers()).get('x-e2e-random-id')) ?? 0;
-  const result = await db.query.counterSchema.findMany({
-    where: eq(counterSchema.id, id),
-  });
-  const count = result[0]?.count ?? 0;
-
-  logger.info('Counter fetched successfully');
 
   return (
     <div>
-      {t('count', { count })}
+      Count:
+      {' '}
+      {count}
     </div>
   );
 };

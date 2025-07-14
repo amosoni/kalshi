@@ -51,8 +51,8 @@ export async function POST(req: NextRequest) {
     let isValid = false;
     try {
       isValid = await bcrypt.compare(password, user.password);
-    } catch (e) {
-      console.error('LOGIN: bcrypt.compare error:', e, 'user.password:', user.password);
+    } catch (_e) {
+      console.error('LOGIN: bcrypt.compare error:', _e, 'user.password:', user.password);
     }
     console.error('LOGIN password valid:', isValid, 'user.password:', user.password);
     if (!isValid) {

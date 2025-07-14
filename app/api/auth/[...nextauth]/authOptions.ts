@@ -41,8 +41,8 @@ export const authOptions = {
           let result = null;
           try {
             result = await res.json();
-          } catch (e) {
-            console.error('LOGIN API JSON PARSE ERROR:', e);
+          } catch (_e) {
+            console.error('LOGIN API JSON PARSE ERROR:', _e);
           }
           console.error('LOGIN API RESULT:', res.status, result);
           if (res.ok && result && result.success && result.user) {

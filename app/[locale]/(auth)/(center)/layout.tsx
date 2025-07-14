@@ -4,6 +4,6 @@ type IAuthCenterLayoutProps = {
   children: ReactNode;
 };
 
-export default async function AuthCenterLayout({ children }: IAuthCenterLayoutProps) {
+export default function AuthCenterLayout({ children }: IAuthCenterLayoutProps) {
   return <>{children}</>;
 }

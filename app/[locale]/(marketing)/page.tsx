@@ -1,5 +1,3 @@
-import { setRequestLocale } from 'next-intl/server';
-
 import ContactSection from '@/components/ContactSection';
 import FAQSection from '@/components/FAQSection';
 import FeaturesSection from '@/components/FeaturesSection';
@@ -11,26 +9,18 @@ import TestimonialsSection from '@/components/TestimonialsSection';
 import UploadAndRemoveBg from '@/components/UploadAndRemoveBg';
 
 type IIndexProps = {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 };
 
-export async function generateMetadata(_props: IIndexProps) {
-  // const t = await getTranslations({
-  //   locale,
-  //   namespace: 'Index',
-  // });
-
+export function generateMetadata(_props: IIndexProps) {
   return {
-    title: 'AI Background Removal', // Fallback title
-    description: 'Remove background from your videos with AI.', // Fallback description
+    title: 'Home',
+    description: 'Home page',
   };
 }
 
 // 全新首页主结构，基于TailGrids Play模板设计，匹配实际功能
-export default async function Index(props: IIndexProps) {
-  const { locale } = props.params;
-  setRequestLocale(locale);
-
+export default function Index(props: IIndexProps) {
   return (
     <main className="min-h-screen bg-white dark:bg-gray-900">
       <HeroSection />

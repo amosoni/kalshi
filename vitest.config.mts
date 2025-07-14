@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   test: {
     coverage: {
+      provider: 'v8',
       include: ['src/**/*'],
       exclude: ['src/**/*.stories.{js,jsx,ts,tsx}'],
     },

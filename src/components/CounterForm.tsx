@@ -1,13 +1,11 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { CounterValidation } from '@/validations/CounterValidation';
 
 export const CounterForm = () => {
-  const t = useTranslations('CounterForm');
   const form = useForm({
     resolver: zodResolver(CounterValidation),
     defaultValues: {
@@ -31,10 +29,10 @@ export const CounterForm = () => {
 
   return (
     <form onSubmit={handleIncrement}>
-      <p>{t('presentation')}</p>
+      <p>The counter is stored in the database and incremented by the value you provide.</p>
       <div>
         <label className="text-sm font-bold text-gray-700" htmlFor="increment">
-          {t('label_increment')}
+          Increment by
           <input
             id="increment"
             type="number"
@@ -54,7 +52,7 @@ export const CounterForm = () => {
           type="submit"
           disabled={form.formState.isSubmitting}
         >
-          {t('button_increment')}
+          Increment
         </button>
       </div>
     </form>

@@ -1,49 +1,32 @@
-import { setRequestLocale } from 'next-intl/server';
 import Image from 'next/image';
-import { routing } from '@/libs/I18nRouting';
 
 type IPortfolioDetailProps = {
-  params: { slug: string; locale: string };
+  params: Promise<{ slug: string; locale: string }>;
 };
 
 export function generateStaticParams() {
-  return routing.locales
-    .map(locale =>
-      Array.from(Array.from({ length: 6 }).keys()).map(elt => ({
-        slug: `${elt}`,
-        locale,
-      })),
-    )
-    .flat(1);
+  return Array.from({ length: 6 }, (_, i) => ({
+    slug: `${i}`,
+    locale: 'en',
+  }));
 }
 
-export async function generateMetadata(_props: IPortfolioDetailProps) {
-  // const t = await getTranslations({
-  //   locale,
-  //   namespace: 'PortfolioSlug',
-  // });
-
+export function generateMetadata(_props: IPortfolioDetailProps) {
   return {
-    title: 'meta_title',
-    description: 'meta_description',
+    title: 'Portfolio Detail',
+    description: 'Portfolio detail page',
   };
 }
 
-export default async function PortfolioDetail(props: IPortfolioDetailProps) {
-  const { locale } = props.params;
-  setRequestLocale(locale);
-  // const t = await getTranslations({
-  //   locale,
-  //   namespace: 'PortfolioSlug',
-  // });
-
+export default function PortfolioDetail(props: IPortfolioDetailProps) {
   return (
     <>
-      <h1 className="capitalize">header</h1>
-      <p>content</p>
+      <h1 className="capitalize">Portfolio Detail</h1>
+      <p>This is the portfolio detail content.</p>
 
       <div className="mt-5 text-center text-sm">
-        {`${'code_review_powered_by'} `}
+        Code review powered by
+        {' '}
         <a
           className="text-blue-700 hover:border-b-2 hover:border-blue-700"
           href="https://www.coderabbit.ai?utm_source=next_js_starter&utm_medium=github&utm_campaign=next_js_starter_oss_2025"
@@ -65,6 +48,6 @@ export default async function PortfolioDetail(props: IPortfolioDetailProps) {
       </a>
     </>
   );
-};
+}
 
 export const dynamicParams = false;

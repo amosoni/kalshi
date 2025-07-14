@@ -1,17 +1,17 @@
 import Image from 'next/image';
 
 type IAboutProps = {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 };
 
-export async function generateMetadata(props: IAboutProps) {
+export function generateMetadata(props: IAboutProps) {
   return {
     title: 'About',
     description: 'About page',
   };
 }
 
-export default async function About(props: IAboutProps) {
+export default function About(props: IAboutProps) {
   return (
     <>
       <p>About page content</p>

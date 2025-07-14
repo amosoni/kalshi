@@ -1,12 +1,13 @@
 import { Hello } from '@/components/Hello';
 
 type IDashboardProps = {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 };
 
-export async function generateMetadata(_props: IDashboardProps) {
+export function generateMetadata(_props: IDashboardProps) {
   return {
     title: 'Dashboard',
+    description: 'Dashboard page',
   };
 }
 

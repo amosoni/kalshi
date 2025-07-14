@@ -1,5 +1,3 @@
-import { routing } from '@/libs/I18nRouting';
-
 export const getBaseUrl = () => {
   if (process.env.NEXT_PUBLIC_APP_URL) {
     return process.env.NEXT_PUBLIC_APP_URL;
@@ -20,9 +18,6 @@ export const getBaseUrl = () => {
 };
 
 export const getI18nPath = (url: string, locale: string) => {
-  if (locale === routing.defaultLocale) {
-    return url;
-  }
-
-  return `/${locale}${url}`;
+  // Only support English for now
+  return url;
 };
