@@ -94,6 +94,7 @@ export const authOptions = {
           email: token.email,
           image: token.image,
         };
+        console.warn('=== [NextAuth] Session callback ===', session.user);
       }
       return session;
     },
