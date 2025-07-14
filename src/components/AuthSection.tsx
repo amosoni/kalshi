@@ -68,9 +68,7 @@ export default function AuthSection() {
         onSubmit={(e) => {
           e.preventDefault();
           setLoading(true);
-          // Clerk authentication logic would go here
-          // For now, we'll just simulate a successful sign-in
-          // alert('Authentication successful!');
+          // 移除 Clerk authentication logic 注释
           setLoading(false);
         }}
         className="space-y-4"

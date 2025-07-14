@@ -115,7 +115,6 @@ export default function UploadAndRemoveBg({ title = 'Upload Video', glass = fals
                       accept="video/*"
                       onChange={(e) => {
                         if (!user?.id) {
-                          // clerk.openSignIn(); // Removed Clerk
                           alert('Please sign in to upload files.');
                           return;
                         }
@@ -181,7 +180,6 @@ export default function UploadAndRemoveBg({ title = 'Upload Video', glass = fals
             type="button"
             onClick={() => {
               if (!user?.id) {
-                // clerk.openSignIn(); // Removed Clerk
                 // TODO: Replace with UI notification
                 console.warn('Please sign in to process videos.');
                 return;
