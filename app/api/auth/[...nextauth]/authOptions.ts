@@ -80,26 +80,14 @@ export const authOptions = {
     },
   },
   callbacks: {
-    async jwt({ token, user }: { token: any; user?: any }) {
+    async session({ session, user }: { session: any; user: any }) {
       if (user) {
-        const u = user as any;
-        token.id = u.id;
-        token.name = u.name;
-        token.username = u.username;
-        token.email = u.email;
-        token.image = u.image;
-      }
-      console.warn('=== [NextAuth] JWT callback ===', token);
-      return token;
-    },
-    async session({ session, token }: { session: any; token: any }) {
-      if (token) {
         session.user = {
-          id: token.id,
-          name: token.name || token.username,
-          username: token.username,
-          email: token.email,
-          image: token.image,
+          id: user.id,
+          name: user.name || user.username,
+          username: user.username,
+          email: user.email,
+          image: user.image,
         };
         console.warn('=== [NextAuth] Session callback user ===', session.user);
       }

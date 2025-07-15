@@ -4,7 +4,6 @@ import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { PrismaClient } from '@prisma/client';
 // TODO: Supabase 相关逻辑已弃用，待替换为新存储/积分方案
 // import { createClient } from '@supabase/supabase-js';
 import ffprobeStatic from 'ffprobe-static';
@@ -61,7 +60,6 @@ export async function POST(req: NextRequest) {
   let userId = null;
   if (sessionToken) {
     // 直接查数据库 session 表
-    const prisma = new PrismaClient();
     const session = await prisma.session.findUnique({ where: { sessionToken } });
     if (session && session.userId) {
       userId = session.userId;
@@ -113,7 +111,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ====== Render 后端时长校验 ======
-    const renderResp = await fetch('https://kalshi-7z8f.onrender.com/api/validate-duration', {
+    const renderResp = await fetch('https://api.kalshiai.org/api/validate-duration', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, videoDuration: durationSec }),
@@ -124,7 +122,7 @@ export async function POST(req: NextRequest) {
     let renderData;
     try {
       renderData = JSON.parse(text) as { valid: boolean; reason?: string };
-    } catch (_e) {
+    } catch (_error) {
       return new Response(JSON.stringify({ error: '视频处理接口返回非JSON内容' }), { status: 500 });
     }
     if (!renderData.valid) {

@@ -12,8 +12,37 @@ module.exports = {
         source: '/api/points/:path*',
         destination: 'https://api.kalshiai.org/api/points/:path*',
       },
-      // 其它如 /api/validate-duration、/api/health、/api/env 保留在 Vercel
-      // 认证相关 API（/api/auth/*、/api/login、/api/register）必须留在 Vercel
+      {
+        source: '/api/validate-duration',
+        destination: 'https://api.kalshiai.org/api/validate-duration',
+      },
+      // 认证相关 API（/api/auth/*、/api/login、/api/register）保留在 Vercel
+      // 健康检查等轻量级 API 也保留在 Vercel
+    ];
+  },
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: 'https://kalshiai.org',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+          {
+            key: 'Access-Control-Allow-Credentials',
+            value: 'true',
+          },
+        ],
+      },
     ];
   },
 };
