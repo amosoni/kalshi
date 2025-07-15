@@ -47,12 +47,19 @@ export const authOptions = {
             }
             console.error('LOGIN API RESULT:', res.status, result);
             if (res.ok && result && result.success && result.user) {
+              // 重新查库，确保 userObj 字段与 User 表完全一致
+              const dbUser = await prisma.user.findUnique({ where: { id: result.user.id } });
+              if (!dbUser) {
+                console.error('authorize: user not found in db after login');
+                return null;
+              }
               const userObj = {
-                id: String(result.user.id),
-                name: String(result.user.username || result.user.email || 'User'),
-                email: result.user.email,
-                image: result.user.image || null,
-                emailVerified: result.user.emailVerified || null,
+                id: dbUser.id,
+                name: dbUser.username || dbUser.email || 'User',
+                username: dbUser.username,
+                email: dbUser.email,
+                image: dbUser.image || null,
+                emailVerified: dbUser.emailVerified || null,
               };
               console.error('authorize return:', userObj); // 关键日志
               return userObj;
