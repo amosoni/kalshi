@@ -9,6 +9,12 @@ export const CurrentCount = () => {
   useEffect(() => {
     const fetchCount = async () => {
       try {
+        // Skip API call during build time
+        if (typeof window === 'undefined') {
+          setLoading(false);
+          return;
+        }
+
         const response = await fetch('/api/counter');
         if (response.ok) {
           const data = await response.json();
