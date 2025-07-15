@@ -16,19 +16,19 @@ export const authOptions = {
         usernameOrEmail: { label: 'Username or Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(_credentials) {
         console.error('===DEBUG ENV===', {
           NEXTAUTH_URL: process.env.NEXTAUTH_URL,
           NODE_ENV: process.env.NODE_ENV,
           ALL_ENV: Object.keys(process.env).filter(k => k.toLowerCase().includes('auth') || k.toLowerCase().includes('api') || k.toLowerCase().includes('base')),
         });
-        if (!credentials) {
+        if (!_credentials) {
           return null;
         }
-        console.error('authorize credentials:', credentials);
+        console.error('authorize credentials:', _credentials);
         // 兼容 email、username 字段
-        const usernameOrEmail = credentials.usernameOrEmail?.trim() || '';
-        const body = { usernameOrEmail, password: credentials.password };
+        const usernameOrEmail = _credentials.usernameOrEmail?.trim() || '';
+        const body = { usernameOrEmail, password: _credentials.password };
         const fetchUrl = `${process.env.NEXTAUTH_URL}/api/login`;
         console.error('NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
         console.error('fetchUrl:', fetchUrl);
