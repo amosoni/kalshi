@@ -1,6 +1,6 @@
 module.exports = {
   typescript: { ignoreBuildErrors: true },
-  output: 'standalone',
+  // output: 'standalone', // 临时注释掉，避免构建问题
   async rewrites() {
     return [
       // 代理重型/AI/视频相关 API 到 Render
