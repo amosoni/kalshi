@@ -49,11 +49,10 @@ export const authOptions = {
             if (res.ok && result && result.success && result.user) {
               const userObj = {
                 id: String(result.user.id),
-                name: String(result.user.username || result.user.email || 'User'), // 强制为字符串且有值
-                username: result.user.username,
+                name: String(result.user.username || result.user.email || 'User'),
                 email: result.user.email,
                 image: result.user.image || null,
-                emailVerified: result.user.emailVerified || new Date(),
+                emailVerified: result.user.emailVerified || null,
               };
               console.error('authorize return:', userObj); // 关键日志
               return userObj;
@@ -85,6 +84,15 @@ export const authOptions = {
     },
   },
   callbacks: {
+    async signIn({ user, account, profile, email, credentials }: any) {
+      try {
+        console.error('[NextAuth] signIn callback ===', { user, account, profile, email, credentials });
+        return true;
+      } catch (e) {
+        console.error('signIn callback error:', e);
+        return false;
+      }
+    },
     async session({ session, user }: any) {
       try {
         if (user) {
