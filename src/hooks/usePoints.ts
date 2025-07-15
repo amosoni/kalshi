@@ -76,7 +76,7 @@ export function usePoints() {
     const response = await fetch(apiUrl('/api/points/consume'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: user.id, amount, description }),
+      body: JSON.stringify({ user_id: user.id, amount, description }), // amount 直接为秒数
       credentials: 'include',
     });
 

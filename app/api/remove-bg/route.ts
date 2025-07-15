@@ -130,10 +130,10 @@ export async function POST(req: NextRequest) {
     }
 
     // ====== 积分校验 ======
-    // 积分校验
+    // 按秒计费
     const userPoints = await prisma.points.findUnique({ where: { user_id: userId } });
     const currentBalance = userPoints?.balance || 0;
-    const cost = durationSec / 60;
+    const cost = durationSec; // 按秒扣除
     if (currentBalance < cost) {
       return new Response(JSON.stringify({ error: 'Insufficient points', currentBalance, requiredAmount: cost }), { status: 403, headers: CORS_HEADERS });
     }
@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (result.status === 'succeeded') {
-      // 扣除积分
+      // 扣除积分（按秒）
       await prisma.points.update({ where: { user_id: userId }, data: { balance: { decrement: cost } } });
       return new Response(JSON.stringify({ resultUrl: result.output }), { status: 200, headers: CORS_HEADERS });
     } else {

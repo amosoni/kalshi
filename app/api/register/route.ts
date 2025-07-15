@@ -42,10 +42,10 @@ export async function POST(req: NextRequest) {
     });
     // 注册赠送积分
     await prisma.points.create({
-      data: { user_id: user.id, balance: 100, total_earned: 100, total_spent: 0 },
+      data: { user_id: user.id, balance: 180, total_earned: 180, total_spent: 0 },
     });
     await prisma.pointsLog.create({
-      data: { user_id: user.id, type: 'register', amount: 100, balance_after: 100 },
+      data: { user_id: user.id, type: 'register', amount: 180, balance_after: 180 },
     });
     const res = NextResponse.json({ success: true, user: { id: user.id, username, email } }, { status: 201 });
     res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');

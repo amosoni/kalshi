@@ -23,8 +23,8 @@ export default function ConsumePointsButton({
   const { points, consumePoints } = usePoints();
   const [loading, setLoading] = useState(false);
 
-  // Round up to the nearest minute
-  const requiredPoints = Math.ceil(videoLengthSeconds / 60);
+  // 按秒计费
+  const requiredPoints = videoLengthSeconds;
 
   const handleClick = async () => {
     if (!points) {
@@ -33,7 +33,7 @@ export default function ConsumePointsButton({
     }
 
     if (points.balance < requiredPoints) {
-      onError?.(`Insufficient points. This video requires ${requiredPoints} points, but you have ${points.balance}.`);
+      onError?.(`Insufficient points. This video requires ${requiredPoints} seconds, but you have ${points.balance}.`);
       return;
     }
 
@@ -70,7 +70,7 @@ export default function ConsumePointsButton({
             </div>
           )
         : (
-            children || `Consume ${requiredPoints} Points`
+            children || `Consume ${requiredPoints} Seconds`
           )}
     </button>
   );
