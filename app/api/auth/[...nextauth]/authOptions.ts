@@ -83,24 +83,26 @@ export const authOptions = {
       if (user) {
         const u = user as any;
         token.id = u.id;
-        token.name = u.name; // 添加 name 字段
+        token.name = u.name;
         token.username = u.username;
         token.email = u.email;
         token.image = u.image;
       }
+      console.warn('=== [NextAuth] JWT callback ===', token);
       return token;
     },
     async session({ session, token }: { session: any; token: any }) {
       if (token) {
         session.user = {
           id: token.id,
-          name: token.name || token.username, // 确保 name 字段存在
+          name: token.name || token.username,
           username: token.username,
           email: token.email,
           image: token.image,
         };
-        console.warn('=== [NextAuth] Session callback ===', session.user);
+        console.warn('=== [NextAuth] Session callback user ===', session.user);
       }
+      console.warn('=== [NextAuth] Session callback return ===', session);
       return session;
     },
   },
