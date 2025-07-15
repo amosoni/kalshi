@@ -1,7 +1,7 @@
 import Image from 'next/image';
 
 type IAboutProps = {
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
 };
 
 export function generateMetadata(props: IAboutProps) {

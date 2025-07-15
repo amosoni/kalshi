@@ -4,7 +4,7 @@ import { CounterForm } from '@/components/CounterForm';
 import { CurrentCount } from '@/components/CurrentCount';
 
 export function generateMetadata(_props: {
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
 }) {
   return {
     title: 'Counter',

@@ -29,11 +29,11 @@ export const metadata: Metadata = {
   ],
 };
 
-export default async function RootLayout(props: {
+export default function RootLayout(props: {
   children: React.ReactNode;
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
 }) {
-  const { locale } = await props.params;
+  const { locale } = props.params;
 
   // Only support English for now
   if (locale !== 'en') {

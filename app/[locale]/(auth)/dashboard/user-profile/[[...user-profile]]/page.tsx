@@ -1,5 +1,5 @@
 type IUserProfilePageProps = {
-  params: Promise<{ 'locale': string; 'user-profile': string[] }>;
+  params: { 'locale': string; 'user-profile'?: string[] };
 };
 
 export function generateMetadata(_props: IUserProfilePageProps) {
@@ -9,10 +9,11 @@ export function generateMetadata(_props: IUserProfilePageProps) {
   };
 }
 
-export default function UserProfilePage() {
+export default function UserProfilePage(props: IUserProfilePageProps) {
   return (
-    <div className="py-5 [&_p]:my-6">
-      <p>User Profile Page</p>
+    <div>
+      <h1>User Profile Page</h1>
+      <pre>{JSON.stringify(props.params, null, 2)}</pre>
     </div>
   );
 }

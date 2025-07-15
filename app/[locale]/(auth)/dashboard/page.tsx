@@ -1,7 +1,7 @@
 import { Hello } from '@/components/Hello';
 
 type IDashboardProps = {
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
 };
 
 export function generateMetadata(_props: IDashboardProps) {

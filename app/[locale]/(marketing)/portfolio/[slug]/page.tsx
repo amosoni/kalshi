@@ -1,7 +1,7 @@
 import Image from 'next/image';
 
 type IPortfolioDetailProps = {
-  params: Promise<{ slug: string; locale: string }>;
+  params: { slug: string; locale: string };
 };
 
 export function generateStaticParams() {

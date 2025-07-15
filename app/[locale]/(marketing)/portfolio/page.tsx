@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 type IPortfolioProps = {
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
 };
 
 export function generateMetadata(props: IPortfolioProps) {
@@ -12,8 +12,8 @@ export function generateMetadata(props: IPortfolioProps) {
   };
 }
 
-export default async function Portfolio(props: IPortfolioProps) {
-  const { locale } = await props.params;
+export default function Portfolio(props: IPortfolioProps) {
+  const { locale } = props.params;
   return (
     <>
       <p>Portfolio presentation</p>
