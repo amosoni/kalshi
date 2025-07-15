@@ -4,10 +4,10 @@ import type { ReactNode } from 'react';
 import DashboardLayoutClient from './DashboardLayoutClient';
 
 type DashboardLayoutProps = {
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
   children: ReactNode;
 };
 
-export default async function DashboardLayout(props: DashboardLayoutProps) {
+export default function DashboardLayout(props: DashboardLayoutProps) {
   return <DashboardLayoutClient {...props} />;
 }

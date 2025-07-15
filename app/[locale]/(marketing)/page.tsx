@@ -9,7 +9,7 @@ import TestimonialsSection from '@/components/TestimonialsSection';
 import UploadAndRemoveBg from '@/components/UploadAndRemoveBg';
 
 type IIndexProps = {
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
 };
 
 export function generateMetadata(_props: IIndexProps) {
