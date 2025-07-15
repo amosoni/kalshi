@@ -48,11 +48,11 @@ export const authOptions = {
           if (res.ok && result && result.success && result.user) {
             const userObj = {
               id: String(result.user.id),
-              name: result.user.username || result.user.email, // 必须有 name 字段
+              name: String(result.user.username || result.user.email || 'User'), // 强制为字符串且有值
               username: result.user.username,
               email: result.user.email,
               image: result.user.image || null,
-              emailVerified: result.user.emailVerified || new Date(), // 关键补充
+              emailVerified: result.user.emailVerified || new Date(),
             };
             console.error('authorize return:', userObj); // 关键日志
             return userObj;
