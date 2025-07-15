@@ -77,7 +77,7 @@ export const authOptions = {
     }),
   ],
   session: {
-    strategy: 'database' as const,
+    strategy: 'jwt' as const,
   },
   cookies: {
     sessionToken: {
