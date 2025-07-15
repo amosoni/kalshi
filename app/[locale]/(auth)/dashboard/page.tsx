@@ -1,10 +1,6 @@
 import { Hello } from '@/components/Hello';
 
-type IDashboardProps = {
-  params: { locale: string };
-};
-
-export function generateMetadata(_props: IDashboardProps) {
+export function generateMetadata(_props: any) {
   return {
     title: 'Dashboard',
     description: 'Dashboard page',

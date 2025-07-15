@@ -29,11 +29,8 @@ export const metadata: Metadata = {
   ],
 };
 
-export default function RootLayout(props: {
-  children: React.ReactNode;
-  params: { locale: string };
-}) {
-  const { locale } = props.params;
+export default function RootLayout(_props: any) {
+  const { locale } = _props.params;
 
   // Only support English for now
   if (locale !== 'en') {
@@ -41,10 +38,10 @@ export default function RootLayout(props: {
   }
 
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body>
         {/* <PostHogProvider> */}
-        {props.children}
+        {_props.children}
         {/* </PostHogProvider> */}
         <DemoBadge />
       </body>

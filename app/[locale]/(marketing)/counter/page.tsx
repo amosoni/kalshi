@@ -3,9 +3,7 @@ import Image from 'next/image';
 import { CounterForm } from '@/components/CounterForm';
 import { CurrentCount } from '@/components/CurrentCount';
 
-export function generateMetadata(_props: {
-  params: { locale: string };
-}) {
+export function generateMetadata(_props: any) {
   return {
     title: 'Counter',
     description: 'Counter page',
