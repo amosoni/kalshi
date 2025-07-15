@@ -1,19 +1,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-type IPortfolioProps = {
-  params: { locale: string };
-};
-
-export function generateMetadata(props: IPortfolioProps) {
+export function generateMetadata(_props: any) {
   return {
     title: 'Portfolio',
     description: 'Portfolio page',
   };
 }
 
-export default function Portfolio(props: IPortfolioProps) {
-  const { locale } = props.params;
+export default function Portfolio(_props: any) {
+  const { locale } = _props.params;
   return (
     <>
       <p>Portfolio presentation</p>

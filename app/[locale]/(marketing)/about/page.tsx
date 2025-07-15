@@ -4,14 +4,14 @@ type IAboutProps = {
   params: { locale: string };
 };
 
-export function generateMetadata(props: IAboutProps) {
+export function generateMetadata(_props: IAboutProps) {
   return {
     title: 'About',
     description: 'About page',
   };
 }
 
-export default function About(props: IAboutProps) {
+export default function About(_props: IAboutProps) {
   return (
     <>
       <p>About page content</p>

@@ -17,7 +17,7 @@ export const getBaseUrl = () => {
   return 'http://localhost:3000';
 };
 
-export const getI18nPath = (url: string, locale: string) => {
+export const getI18nPath = (url: string, _locale: string) => {
   // Only support English for now
   return url;
 };

@@ -8,11 +8,7 @@ import PricingSection from '@/components/PricingSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
 import UploadAndRemoveBg from '@/components/UploadAndRemoveBg';
 
-type IIndexProps = {
-  params: { locale: string };
-};
-
-export function generateMetadata(_props: IIndexProps) {
+export function generateMetadata(_props: any) {
   return {
     title: 'Home',
     description: 'Home page',
@@ -20,7 +16,7 @@ export function generateMetadata(_props: IIndexProps) {
 }
 
 // 全新首页主结构，基于TailGrids Play模板设计，匹配实际功能
-export default function Index(props: IIndexProps) {
+export default function Index(_props: any) {
   return (
     <main className="min-h-screen bg-white dark:bg-gray-900">
       <HeroSection />

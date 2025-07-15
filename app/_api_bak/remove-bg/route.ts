@@ -8,11 +8,11 @@ import path from 'node:path';
 // import { createClient } from '@supabase/supabase-js';
 import ffprobeStatic from 'ffprobe-static';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { authOptions } from 'libs/authOptions';
 import { prisma } from 'libs/prisma';
 import { getServerSession } from 'next-auth';
 import fetchOrig from 'node-fetch';
 import { v4 as uuidv4 } from 'uuid';
-import { authOptions } from '../auth/[...nextauth]/authOptions';
 
 export const runtime = 'nodejs';
 

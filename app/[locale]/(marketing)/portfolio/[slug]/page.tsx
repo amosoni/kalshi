@@ -1,9 +1,5 @@
 import Image from 'next/image';
 
-type IPortfolioDetailProps = {
-  params: { slug: string; locale: string };
-};
-
 export function generateStaticParams() {
   return Array.from({ length: 6 }, (_, i) => ({
     slug: `${i}`,
@@ -11,14 +7,14 @@ export function generateStaticParams() {
   }));
 }
 
-export function generateMetadata(_props: IPortfolioDetailProps) {
+export function generateMetadata(_props: any) {
   return {
     title: 'Portfolio Detail',
     description: 'Portfolio detail page',
   };
 }
 
-export default function PortfolioDetail(props: IPortfolioDetailProps) {
+export default function PortfolioDetail(_props: any) {
   return (
     <>
       <h1 className="capitalize">Portfolio Detail</h1>
