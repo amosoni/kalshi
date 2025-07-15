@@ -3,6 +3,11 @@ import { NextResponse } from 'next/server';
 import { authOptions } from '../../../api/auth/[...nextauth]/authOptions';
 
 export async function GET(_req: Request) {
+  // Skip during build time
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return NextResponse.json([]);
+  }
+
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
   if (!userId) {

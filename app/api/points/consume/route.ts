@@ -5,6 +5,11 @@ import { NextResponse } from 'next/server';
 import { authOptions } from '../../../api/auth/[...nextauth]/authOptions';
 
 export async function POST(req: Request) {
+  // Skip during build time
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    return NextResponse.json({ success: true, consumedAmount: 0 });
+  }
+
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
   if (!userId) {

@@ -26,6 +26,13 @@ export function usePoints() {
   const lastUserId = useRef<string | null>(null);
 
   const fetchPoints = async () => {
+    // Skip API calls during build time
+    if (typeof window === 'undefined' || process.env.NEXT_PHASE === 'phase-production-build') {
+      setPoints(null);
+      setLoading(false);
+      return;
+    }
+
     if (!user) {
       setPoints(null);
       setLoading(false);
@@ -57,6 +64,11 @@ export function usePoints() {
   }, [user?.id, fetchPoints]);
 
   const consumePoints = async (amount: number, description: string) => {
+    // Skip API calls during build time
+    if (typeof window === 'undefined' || process.env.NEXT_PHASE === 'phase-production-build') {
+      throw new Error('Cannot consume points during build time');
+    }
+
     if (!user) {
       throw new Error('User not authenticated');
     }
@@ -93,6 +105,13 @@ export function usePointsLog() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchLogs = async () => {
+    // Skip API calls during build time
+    if (typeof window === 'undefined' || process.env.NEXT_PHASE === 'phase-production-build') {
+      setLogs([]);
+      setLoading(false);
+      return;
+    }
+
     if (!user) {
       setLogs([]);
       setLoading(false);
@@ -135,6 +154,11 @@ export function useRecharge() {
   const [error, setError] = useState<string | null>(null);
 
   const recharge = async (product_id: string) => {
+    // Skip API calls during build time
+    if (typeof window === 'undefined' || process.env.NEXT_PHASE === 'phase-production-build') {
+      throw new Error('Cannot recharge during build time');
+    }
+
     if (!user) {
       signIn('google');
       return;
