@@ -46,13 +46,15 @@ export const authOptions = {
           }
           console.error('LOGIN API RESULT:', res.status, result);
           if (res.ok && result && result.success && result.user) {
-            return {
-              id: String(result.user.id), // 确保 id 是 string 类型
-              name: result.user.username || result.user.email, // NextAuth 要求必须有 name 字段
+            const userObj = {
+              id: String(result.user.id),
+              name: result.user.username || result.user.email, // 必须有 name 字段
               username: result.user.username,
               email: result.user.email,
               image: result.user.image || null,
             };
+            console.error('authorize return:', userObj); // 关键日志
+            return userObj;
           }
           return null;
         } catch (err) {
