@@ -47,7 +47,8 @@ export const authOptions = {
           console.error('LOGIN API RESULT:', res.status, result);
           if (res.ok && result && result.success && result.user) {
             return {
-              id: result.user.id,
+              id: String(result.user.id), // 确保 id 是 string 类型
+              name: result.user.username || result.user.email, // NextAuth 要求必须有 name 字段
               username: result.user.username,
               email: result.user.email,
               image: result.user.image || null,
@@ -80,6 +81,7 @@ export const authOptions = {
       if (user) {
         const u = user as any;
         token.id = u.id;
+        token.name = u.name; // 添加 name 字段
         token.username = u.username;
         token.email = u.email;
         token.image = u.image;
@@ -90,6 +92,7 @@ export const authOptions = {
       if (token) {
         session.user = {
           id: token.id,
+          name: token.name || token.username, // 确保 name 字段存在
           username: token.username,
           email: token.email,
           image: token.image,
