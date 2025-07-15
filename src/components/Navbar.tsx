@@ -235,7 +235,7 @@ function SignInModal({ open, onClose, onSignUp, usernameOrEmail, setUsernameOrEm
         throw new Error(res.error);
       }
       onClose();
-      window.location.reload();
+      window.location.href = '/';
     } catch (err: any) {
       setError(err.message);
     } finally {

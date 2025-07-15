@@ -1,3 +1,4 @@
+import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 import { usePoints } from '../hooks/usePoints';
 import { useUser } from '../hooks/useUser';
@@ -65,11 +66,51 @@ export default function AuthSection() {
       </div>
 
       <form
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
           setLoading(true);
-          // 移除 Clerk authentication logic 注释
-          setLoading(false);
+          if (isSignUp) {
+            // 注册逻辑
+            try {
+              const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+              });
+              if (!res.ok) {
+                throw new Error('注册失败');
+              }
+              // 注册成功后自动登录
+              const loginRes = await signIn('credentials', {
+                usernameOrEmail: email,
+                password,
+                redirect: false,
+              });
+              if (loginRes?.ok) {
+                window.location.href = '/';
+              }
+            } catch (err) {
+              // 可加 setError
+            } finally {
+              setLoading(false);
+            }
+          } else {
+            // 登录逻辑
+            try {
+              const loginRes = await signIn('credentials', {
+                usernameOrEmail: email,
+                password,
+                redirect: false,
+              });
+              if (loginRes?.ok) {
+                window.location.href = '/';
+              }
+            } catch (err) {
+              // 可加 setError
+            } finally {
+              setLoading(false);
+            }
+          }
         }}
         className="space-y-4"
       >

@@ -33,12 +33,16 @@ export default function SignUpModal({ open, onClose, onSignIn }: { open: boolean
       }
       setSuccess(true);
       setTimeout(async () => {
-        await signIn('credentials', {
+        const loginRes = await signIn('credentials', {
           usernameOrEmail: email.trim() || username.trim(),
           password,
-          redirect: true,
-          callbackUrl: '/',
+          redirect: false,
         });
+        if (loginRes?.ok) {
+          window.location.href = '/';
+        } else {
+          setError('自动登录失败');
+        }
       }, 1000);
     } catch (err: any) {
       setError(err.message);

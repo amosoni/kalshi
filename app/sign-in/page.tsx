@@ -55,8 +55,11 @@ function SignInContent() {
       <form onSubmit={async (e) => {
         e.preventDefault();
         setEmailLoading(true);
-        await signIn('email', { email });
+        const res = await signIn('email', { email, redirect: false });
         setEmailLoading(false);
+        if (res?.ok) {
+          window.location.href = '/';
+        }
       }}
       >
         <input
