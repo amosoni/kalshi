@@ -52,6 +52,7 @@ export const authOptions = {
               username: result.user.username,
               email: result.user.email,
               image: result.user.image || null,
+              emailVerified: result.user.emailVerified || new Date(), // 关键补充
             };
             console.error('authorize return:', userObj); // 关键日志
             return userObj;
