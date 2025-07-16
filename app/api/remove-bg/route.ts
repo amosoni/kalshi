@@ -1,12 +1,9 @@
 import type { NextRequest } from 'next/server';
 import { Buffer } from 'node:buffer';
-import { execSync } from 'node:child_process';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 // TODO: Supabase 相关逻辑已弃用，待替换为新存储/积分方案
 // import { createClient } from '@supabase/supabase-js';
-import ffprobeStatic from 'ffprobe-static';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { prisma } from 'libs/prisma';
 import { getServerSession } from 'next-auth';
@@ -86,23 +83,26 @@ export async function POST(req: NextRequest) {
 
     const backgroundColor = formData.get('background_color') as string || '#FFFFFF';
 
-    console.error('ffprobeStatic.path', ffprobeStatic.path, fs.existsSync(ffprobeStatic.path));
-    // ====== 检查视频时长（每次最多30秒） ======
-    const tempPath = path.join(os.tmpdir(), fileName);
-    fs.writeFileSync(tempPath, buffer);
-    const getDuration = (filePath: string) => {
-      const ffprobePath = ffprobeStatic.path;
-      console.error('ffprobeStatic.path in getDuration', ffprobePath, fs.existsSync(ffprobePath));
-      try {
-        const out = execSync(`"${ffprobePath}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`).toString();
-        return Math.ceil(Number.parseFloat(out));
-      } catch (err: any) {
-        console.error('ffprobe execSync error:', err.message, err.stack);
-        return 0;
-      }
-    };
-    const durationSec = getDuration(tempPath);
-    fs.unlinkSync(tempPath);
+    // ====== 使用Render后端检查视频时长 ======
+    const durationCheckRes = await fetch('https://api.kalshiai.org/api/check-video-duration', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        fileName: file.name,
+        fileSize: file.size,
+      }),
+    });
+
+    if (!durationCheckRes.ok) {
+      const errorText = await durationCheckRes.text();
+      console.error('视频时长检查失败:', durationCheckRes.status, errorText);
+      return new Response(JSON.stringify({ error: '视频时长检查失败' }), { status: 400, headers: CORS_HEADERS });
+    }
+
+    const durationData = await durationCheckRes.json() as { duration: number };
+    const durationSec = durationData.duration;
+
     if (durationSec <= 0) {
       return new Response(JSON.stringify({ error: 'Failed to get video duration' }), { status: 400, headers: CORS_HEADERS });
     }

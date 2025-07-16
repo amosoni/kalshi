@@ -11,6 +11,29 @@ app.post('/api/bonus', (req, res) => {
   res.json({ success: true, bonus: 3, userId });
 });
 
+// 视频时长检查接口
+app.post('/api/check-video-duration', (req, res) => {
+  const { userId, fileName, fileSize } = req.body;
+
+  try {
+    // 这里应该接收视频文件并检查时长
+    // 由于前端已经上传了文件，我们需要一个临时方案
+    // 基于文件大小估算时长（粗略估算）
+    const estimatedDuration = Math.ceil(fileSize / (1024 * 1024 * 2)); // 假设2MB/秒
+
+    console.warn(`用户 ${userId} 上传视频 ${fileName}，估算时长: ${estimatedDuration}秒`);
+
+    res.json({
+      duration: estimatedDuration,
+      userId,
+      fileName,
+    });
+  } catch (error) {
+    console.error('视频时长检查失败:', error);
+    res.status(500).json({ error: '视频时长检查失败' });
+  }
+});
+
 // 示例：时长验证接口
 app.post('/api/validate-duration', (req, res) => {
   const { videoDuration } = req.body;
