@@ -1,6 +1,8 @@
-const { Buffer } = require('node:buffer');
 const cors = require('cors');
 const express = require('express');
+const multer = require('multer');
+
+const upload = multer();
 
 const app = express();
 
@@ -13,13 +15,16 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' })); // 增加请求体大小限制
 
 // 视频背景移除接口
-app.post('/api/remove-bg', (req, res) => {
-  const { userId, fileName, fileSize, backgroundColor, fileData } = req.body;
+app.post('/api/remove-bg', upload.single('file'), (req, res) => {
+  const userId = req.body.user_id;
+  const fileName = req.file?.originalname;
+  const fileSize = req.file?.size;
+  const backgroundColor = req.body.background_color || '#FFFFFF';
 
   try {
     // 1. 检查视频时长
     const estimatedDuration = Math.ceil(fileSize / (1024 * 1024 * 2)); // 假设2MB/秒
-    console.warn(`用户 ${userId} 上传视频 ${fileName}，估算时长: ${estimatedDuration}秒`);
+    console.warn(`用户 ${userId} 上传视频 ${fileName}, 估算时长: ${estimatedDuration}秒`);
 
     if (estimatedDuration <= 0) {
       return res.status(400).json({ error: 'Failed to get video duration' });
@@ -37,7 +42,7 @@ app.post('/api/remove-bg', (req, res) => {
     // TODO: 实现积分扣除逻辑
 
     // 4. 处理视频文件
-    const buffer = Buffer.from(fileData, 'base64');
+    const buffer = req.file.buffer;
     const tempFileName = `${Date.now()}-${fileName}`;
     const tempPath = `/tmp/${tempFileName}`;
 
