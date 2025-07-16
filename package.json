@@ -46,7 +46,7 @@
     "bcryptjs": "^3.0.2",
     "drizzle-orm": "^0.44.2",
     "express-rate-limit": "^7.5.1",
-    "ffprobe-static": "^1.1.0",
+
     "formidable": "^3.5.4",
     "https-proxy-agent": "^7.0.6",
     "next": "^14.2.3",

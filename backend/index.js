@@ -1,7 +1,15 @@
 const { Buffer } = require('node:buffer');
+const cors = require('cors');
 const express = require('express');
 
 const app = express();
+
+// CORS 配置
+app.use(cors({
+  origin: 'https://kalshiai.org',
+  credentials: true,
+}));
+
 app.use(express.json({ limit: '50mb' })); // 增加请求体大小限制
 
 // 视频背景移除接口

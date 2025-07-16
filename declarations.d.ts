@@ -1,1 +1,1 @@
-declare module 'ffprobe-static';
+// declare module 'ffprobe-static'; // 已移除
