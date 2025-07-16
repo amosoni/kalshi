@@ -39,7 +39,7 @@ export const authOptions = {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(body),
             });
-            let result = null;
+            let result: any = null;
             try {
               result = await res.json();
             } catch (_e) {
@@ -81,7 +81,7 @@ export const authOptions = {
   },
   cookies: {
     sessionToken: {
-      name: 'next-auth.session-token',
+      name: '__Secure-next-auth.session-token',
       options: {
         httpOnly: true,
         sameSite: 'lax' as const,
