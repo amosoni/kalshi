@@ -94,6 +94,36 @@ export const authOptions = {
     async signIn({ user, account, profile, email, credentials }: any) {
       try {
         console.error('[NextAuth] signIn callback ===', { user, account, profile, email, credentials });
+
+        // 如果是Google登录且是新用户，赠送免费积分
+        if (account?.provider === 'google' && user?.id) {
+          // 检查用户是否已有积分记录
+          const existingPoints = await prisma.points.findUnique({
+            where: { user_id: user.id },
+          });
+          // 如果没有积分记录，说明是新用户，赠送180积分（3分钟）
+          if (!existingPoints) {
+            console.warn(`[NextAuth] 新用户 ${user.email} 通过Google登录，赠送180积分（3分钟）`);
+            await prisma.points.create({
+              data: {
+                user_id: user.id,
+                balance: 180,
+                total_earned: 180,
+                total_spent: 0,
+              },
+            });
+            await prisma.pointsLog.create({
+              data: {
+                user_id: user.id,
+                type: 'earn',
+                amount: 180,
+                balance_after: 180,
+                description: 'Google登录新用户赠送180积分（3分钟）',
+              },
+            });
+          }
+        }
+
         return true;
       } catch (e) {
         console.error('signIn callback error:', e);

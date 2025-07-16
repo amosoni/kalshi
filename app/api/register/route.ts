@@ -40,12 +40,18 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.create({
       data: { username, email, password: hashedPassword },
     });
-    // 注册赠送积分
+    // 注册赠送180积分（3分钟）
     await prisma.points.create({
       data: { user_id: user.id, balance: 180, total_earned: 180, total_spent: 0 },
     });
     await prisma.pointsLog.create({
-      data: { user_id: user.id, type: 'register', amount: 180, balance_after: 180 },
+      data: {
+        user_id: user.id,
+        type: 'earn',
+        amount: 180,
+        balance_after: 180,
+        description: '新用户注册赠送180积分（3分钟）',
+      },
     });
     const res = NextResponse.json({ success: true, user: { id: user.id, username, email } }, { status: 201 });
     res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
