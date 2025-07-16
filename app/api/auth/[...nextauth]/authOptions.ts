@@ -100,15 +100,28 @@ export const authOptions = {
         return false;
       }
     },
-    async session({ session, user }: any) {
+    async jwt({ token, user }: any) {
       try {
         if (user) {
+          token.sub = user.id;
+          token.username = user.username;
+        }
+        console.warn('=== [NextAuth] JWT callback ===', { token, user });
+        return token;
+      } catch (e) {
+        console.error('JWT callback error:', e);
+        throw e;
+      }
+    },
+    async session({ session, token }: any) {
+      try {
+        if (token) {
           session.user = {
-            id: user.id,
-            name: user.name || user.username,
-            username: user.username,
-            email: user.email,
-            image: user.image,
+            id: token.sub,
+            name: token.name || token.username,
+            username: token.username,
+            email: token.email,
+            image: token.picture,
           };
           console.warn('=== [NextAuth] Session callback user ===', session.user);
         }

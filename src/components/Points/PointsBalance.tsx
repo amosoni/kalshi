@@ -3,10 +3,15 @@ import { usePoints } from '../../hooks/usePoints';
 type PointsBalanceProps = {
   className?: string;
   showLabel?: boolean;
+  showRetry?: boolean;
 };
 
-export default function PointsBalance({ className = '', showLabel = true }: PointsBalanceProps) {
-  const { points, loading, error } = usePoints();
+export default function PointsBalance({
+  className = '',
+  showLabel = true,
+  showRetry = true,
+}: PointsBalanceProps) {
+  const { points, loading, error, refetch } = usePoints();
 
   if (loading) {
     return (
@@ -17,16 +22,34 @@ export default function PointsBalance({ className = '', showLabel = true }: Poin
     );
   }
 
-  if (error) {
+  if (error && showRetry) {
     return (
       <div className={`flex items-center space-x-2 ${className}`}>
-        <span className="text-red-500 text-sm">Error loading points</span>
+        <span className="text-red-500 text-sm">积分加载失败</span>
+        <button
+          onClick={() => refetch()}
+          className="text-xs text-blue-600 hover:text-blue-800 underline"
+        >
+          重试
+        </button>
+      </div>
+    );
+  }
+
+  if (error && !showRetry) {
+    return (
+      <div className={`flex items-center space-x-2 ${className}`}>
+        <span className="text-red-500 text-sm">积分加载失败</span>
       </div>
     );
   }
 
   if (!points) {
-    return null;
+    return (
+      <div className={`flex items-center space-x-2 ${className}`}>
+        <span className="text-gray-500 text-sm">未登录</span>
+      </div>
+    );
   }
 
   return (
@@ -36,7 +59,7 @@ export default function PointsBalance({ className = '', showLabel = true }: Poin
           {points.balance.toLocaleString()}
         </span>
         {showLabel && (
-          <span className="text-sm text-gray-600">Points</span>
+          <span className="text-sm text-gray-600">积分</span>
         )}
       </div>
     </div>

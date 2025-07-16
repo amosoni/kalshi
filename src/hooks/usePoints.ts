@@ -1,5 +1,5 @@
 import { signIn } from 'next-auth/react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { apiUrl } from '@/utils/api';
 import { useUser } from './useUser';
 
@@ -18,6 +18,46 @@ export type PointsLogEntry = {
   created_at: string;
 };
 
+// 重试函数
+const retryFetch = async (
+  url: string,
+  options: RequestInit,
+  maxRetries: number = 3,
+  delay: number = 1000,
+): Promise<Response> => {
+  let lastError: any;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+
+      // 如果是服务器错误，尝试重试
+      if (response.status >= 500 && attempt < maxRetries) {
+        console.warn(`Server error on attempt ${attempt}, retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay *= 2; // 指数退避
+        continue;
+      }
+
+      return response;
+    } catch (error: any) {
+      lastError = error;
+
+      // 如果是网络错误，尝试重试
+      if (attempt < maxRetries) {
+        console.warn(`Network error on attempt ${attempt}, retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay *= 2;
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  throw lastError;
+};
+
 export function usePoints() {
   const user = useUser();
   const [points, setPoints] = useState<PointsData | null>(null);
@@ -25,7 +65,7 @@ export function usePoints() {
   const [error, setError] = useState<string | null>(null);
   const lastUserId = useRef<string | null>(null);
 
-  const fetchPoints = async () => {
+  const fetchPoints = useCallback(async () => {
     // Skip API calls during build time
     if (typeof window === 'undefined' || process.env.NEXT_PHASE === 'phase-production-build') {
       setPoints(null);
@@ -38,23 +78,45 @@ export function usePoints() {
       setLoading(false);
       return;
     }
+
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(apiUrl('/api/points'), {
+
+      const response = await retryFetch(apiUrl('/api/points'), {
         credentials: 'include',
       });
+
       if (!response.ok) {
+        // 如果是服务器错误，返回默认值而不是抛出错误
+        if (response.status >= 500) {
+          console.warn('Server error, using default points values');
+          setPoints({ balance: 0, total_earned: 0, total_spent: 0 });
+          return;
+        }
         throw new Error('Failed to fetch points');
       }
+
       const data = await response.json();
       setPoints(data);
     } catch (err) {
+      console.error('Error fetching points:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
+
+      // 如果是网络错误，设置默认值而不是显示错误
+      if (err instanceof Error && (
+        err.message.includes('Failed to fetch')
+        || err.message.includes('NetworkError')
+        || err.message.includes('connection')
+      )) {
+        console.warn('Network error, using default points values');
+        setPoints({ balance: 0, total_earned: 0, total_spent: 0 });
+        setError(null); // 清除错误状态
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (user?.id && lastUserId.current !== user.id) {
@@ -73,7 +135,7 @@ export function usePoints() {
       throw new Error('User not authenticated');
     }
 
-    const response = await fetch(apiUrl('/api/points/consume'), {
+    const response = await retryFetch(apiUrl('/api/points/consume'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: user.id, amount, description }), // amount 直接为秒数
@@ -104,7 +166,7 @@ export function usePointsLog() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     // Skip API calls during build time
     if (typeof window === 'undefined' || process.env.NEXT_PHASE === 'phase-production-build') {
       setLogs([]);
@@ -134,11 +196,11 @@ export function usePointsLog() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchLogs();
-  }, [user]);
+  }, [fetchLogs]);
 
   return {
     logs,

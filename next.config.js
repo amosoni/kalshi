@@ -8,10 +8,11 @@ module.exports = {
         source: '/api/remove-bg/:path*',
         destination: 'https://api.kalshiai.org/api/remove-bg/:path*',
       },
-      {
-        source: '/api/points/:path*',
-        destination: 'https://api.kalshiai.org/api/points/:path*',
-      },
+      // 积分API保留在Vercel，不代理到Render
+      // {
+      //   source: '/api/points/:path*',
+      //   destination: 'https://api.kalshiai.org/api/points/:path*',
+      // },
       {
         source: '/api/validate-duration',
         destination: 'https://api.kalshiai.org/api/validate-duration',
