@@ -1,7 +1,60 @@
+const { Buffer } = require('node:buffer');
 const express = require('express');
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // 增加请求体大小限制
+
+// 视频背景移除接口
+app.post('/api/remove-bg', (req, res) => {
+  const { userId, fileName, fileSize, backgroundColor, fileData } = req.body;
+
+  try {
+    // 1. 检查视频时长
+    const estimatedDuration = Math.ceil(fileSize / (1024 * 1024 * 2)); // 假设2MB/秒
+    console.warn(`用户 ${userId} 上传视频 ${fileName}，估算时长: ${estimatedDuration}秒`);
+
+    if (estimatedDuration <= 0) {
+      return res.status(400).json({ error: 'Failed to get video duration' });
+    }
+    if (estimatedDuration > 30) {
+      return res.status(429).json({ error: '免费用户每次最多处理30秒视频' });
+    }
+
+    // 2. 时长验证
+    if (estimatedDuration > 30) {
+      return res.status(429).json({ error: '免费用户每次最多处理30秒视频' });
+    }
+
+    // 3. 积分校验和扣除（这里需要连接数据库）
+    // TODO: 实现积分扣除逻辑
+
+    // 4. 处理视频文件
+    const buffer = Buffer.from(fileData, 'base64');
+    const tempFileName = `${Date.now()}-${fileName}`;
+    const tempPath = `/tmp/${tempFileName}`;
+
+    // 写入临时文件
+    require('node:fs').writeFileSync(tempPath, buffer);
+
+    // 5. 调用Replicate AI处理视频
+    // TODO: 实现实际的Replicate API调用
+    console.warn('调用Replicate AI处理视频:', tempPath, '背景色:', backgroundColor);
+
+    // 6. 清理临时文件
+    require('node:fs').unlinkSync(tempPath);
+
+    // 7. 返回结果
+    res.json({
+      success: true,
+      resultUrl: 'processed_video_url', // 这里应该是实际的处理结果URL
+      duration: estimatedDuration,
+      cost: estimatedDuration,
+    });
+  } catch (error) {
+    console.error('视频背景移除失败:', error);
+    res.status(500).json({ error: '视频处理失败' });
+  }
+});
 
 // 示例：免费赠送接口
 app.post('/api/bonus', (req, res) => {
