@@ -7,7 +7,7 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Origin': 'https://kalshiai.org',
   'Access-Control-Allow-Credentials': 'true',
   'Access-Control-Allow-Methods': 'GET,OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type,Authorization,Cookie',
 };
 
 export async function OPTIONS() {
