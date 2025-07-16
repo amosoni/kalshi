@@ -1,3 +1,4 @@
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const cors = require('cors');
 const express = require('express');
 const multer = require('multer');
@@ -14,16 +15,25 @@ app.use(cors({
 
 app.use(express.json({ limit: '50mb' })); // 增加请求体大小限制
 
+const r2 = new S3Client({
+  region: 'auto',
+  endpoint: process.env.R2_ENDPOINT,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+});
+const R2_BUCKET = process.env.R2_BUCKET;
+const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL; // 可选，若已开启
+
 // 视频背景移除接口
-app.post('/api/remove-bg', upload.single('file'), (req, res) => {
+app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
   const userId = req.body.user_id;
   const fileName = req.file?.originalname;
   const fileSize = req.file?.size;
-  const backgroundColor = req.body.background_color || '#FFFFFF';
 
   try {
-    // 1. 检查视频时长
-    const estimatedDuration = Math.ceil(fileSize / (1024 * 1024 * 2)); // 假设2MB/秒
+    const estimatedDuration = Math.ceil(fileSize / (1024 * 1024 * 2));
     console.warn(`用户 ${userId} 上传视频 ${fileName}, 估算时长: ${estimatedDuration}秒`);
 
     if (estimatedDuration <= 0) {
@@ -33,33 +43,29 @@ app.post('/api/remove-bg', upload.single('file'), (req, res) => {
       return res.status(429).json({ error: '免费用户每次最多处理30秒视频' });
     }
 
-    // 2. 时长验证
-    if (estimatedDuration > 30) {
-      return res.status(429).json({ error: '免费用户每次最多处理30秒视频' });
-    }
-
-    // 3. 积分校验和扣除（这里需要连接数据库）
-    // TODO: 实现积分扣除逻辑
-
-    // 4. 处理视频文件
+    // 处理视频文件
     const buffer = req.file.buffer;
     const tempFileName = `${Date.now()}-${fileName}`;
     const tempPath = `/tmp/${tempFileName}`;
-
-    // 写入临时文件
     require('node:fs').writeFileSync(tempPath, buffer);
-
-    // 5. 调用Replicate AI处理视频
-    // TODO: 实现实际的Replicate API调用
-    console.warn('调用Replicate AI处理视频:', tempPath, '背景色:', backgroundColor);
-
-    // 6. 清理临时文件
+    // TODO: AI 处理逻辑...
+    // 上传到 R2
+    const r2Key = `${userId}/${Date.now()}-${fileName}`;
+    await r2.send(new PutObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: r2Key,
+      Body: buffer,
+      ContentType: req.file.mimetype || 'video/mp4',
+    }));
+    // 生成公网 URL
+    const resultUrl = R2_PUBLIC_URL
+      ? `${R2_PUBLIC_URL}/${r2Key}`
+      : `https://${R2_BUCKET}.${process.env.R2_ENDPOINT.replace(/^https?:\/\//, '')}/${r2Key}`;
+    // 清理临时文件
     require('node:fs').unlinkSync(tempPath);
-
-    // 7. 返回结果
     res.json({
       success: true,
-      resultUrl: 'processed_video_url', // 这里应该是实际的处理结果URL
+      resultUrl,
       duration: estimatedDuration,
       cost: estimatedDuration,
     });
