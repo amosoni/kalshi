@@ -6,19 +6,6 @@ const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 const createPrismaClient = () => {
   return new PrismaClient({
     log: ['query', 'info', 'warn', 'error'],
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL,
-      },
-    },
-    // 为Neon数据库优化连接池
-    ...(process.env.DATABASE_URL?.includes('neon.tech') && {
-      datasources: {
-        db: {
-          url: process.env.DATABASE_URL,
-        },
-      },
-    }),
   });
 };
 
