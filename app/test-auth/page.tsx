@@ -29,7 +29,7 @@ export default function TestAuth() {
       });
       if (loginRes?.ok) {
         setMsg('自动登录成功！');
-        window.location.href = '/';
+        window.location.reload(); // 登录/注册成功后强制刷新页面，确保 session 立即同步
       } else {
         setMsg('自动登录失败');
       }
@@ -49,7 +49,7 @@ export default function TestAuth() {
     });
     if (loginRes?.ok) {
       setMsg('登录成功！');
-      window.location.href = '/';
+      window.location.reload(); // 登录/注册成功后强制刷新页面，确保 session 立即同步
     } else {
       setMsg('登录失败');
     }

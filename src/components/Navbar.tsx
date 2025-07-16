@@ -235,7 +235,7 @@ function SignInModal({ open, onClose, onSignUp, usernameOrEmail, setUsernameOrEm
         throw new Error(res.error);
       }
       onClose();
-      window.location.href = '/';
+      window.location.reload(); // 登录成功后强制刷新页面，确保 session 立即同步
     } catch (err: any) {
       setError(err.message);
     } finally {

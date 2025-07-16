@@ -14,7 +14,7 @@ RUN npm ci --only=production
 COPY . .
 
 # 暴露端口
-EXPOSE 3000
+EXPOSE 3001
 
 # 启动应用
 CMD ["node", "index.js"] 

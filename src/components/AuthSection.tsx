@@ -87,7 +87,7 @@ export default function AuthSection() {
                 redirect: false,
               });
               if (loginRes?.ok) {
-                window.location.href = '/';
+                window.location.reload(); // 登录/注册成功后强制刷新页面，确保 session 立即同步
               }
             } catch (err) {
               // 可加 setError
@@ -103,7 +103,7 @@ export default function AuthSection() {
                 redirect: false,
               });
               if (loginRes?.ok) {
-                window.location.href = '/';
+                window.location.reload(); // 登录/注册成功后强制刷新页面，确保 session 立即同步
               }
             } catch (err) {
               // 可加 setError

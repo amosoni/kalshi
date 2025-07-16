@@ -58,7 +58,7 @@ function SignInContent() {
         const res = await signIn('email', { email, redirect: false });
         setEmailLoading(false);
         if (res?.ok) {
-          window.location.href = '/';
+          window.location.reload(); // 登录/注册成功后强制刷新页面，确保 session 立即同步
         }
       }}
       >
