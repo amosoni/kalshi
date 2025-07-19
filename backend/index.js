@@ -9,11 +9,23 @@ const app = express();
 
 // CORS 配置
 app.use(cors({
-  origin: 'https://kalshiai.org',
+  origin: ['https://kalshiai.org', 'http://localhost:3000'],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 
 app.use(express.json({ limit: '50mb' })); // 增加请求体大小限制
+
+// 健康检查端点
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'kalshiai-backend',
+    version: '1.0.0',
+  });
+});
 
 const r2 = new S3Client({
   region: 'auto',

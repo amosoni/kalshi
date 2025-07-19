@@ -68,18 +68,39 @@ export default function UploadAndRemoveBg({ title = 'Upload Video', glass = fals
   const handleDownload = async () => {
     if (processedVideoUrl) {
       try {
-        const response = await fetch(processedVideoUrl, { mode: 'cors' });
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
+        // 对于R2存储的URL，直接使用，不需要额外的fetch
         const link = document.createElement('a');
-        link.href = url;
+        link.href = processedVideoUrl;
         link.download = `processed_${uploadedFile?.name || 'video.mp4'}`;
+        link.target = '_blank'; // 在新标签页打开，避免跨域问题
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      } catch {
-        // alert('Download failed. Please try again.');
+      } catch (error) {
+        console.error('Download failed:', error);
+        // 如果直接下载失败，尝试通过代理下载
+        try {
+          const response = await fetch(`/api/download?url=${encodeURIComponent(processedVideoUrl)}`, {
+            method: 'GET',
+            credentials: 'include',
+          });
+          if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `processed_${uploadedFile?.name || 'video.mp4'}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          } else {
+            alert('Download failed. Please try again.');
+          }
+        } catch (proxyError) {
+          console.error('Proxy download also failed:', proxyError);
+          alert('Download failed. Please try again.');
+        }
       }
     }
   };
