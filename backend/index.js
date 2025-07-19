@@ -34,15 +34,52 @@ const r2 = new S3Client({
     accessKeyId: process.env.R2_ACCESS_KEY_ID,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
   },
+  // 添加SSL配置
+  forcePathStyle: true,
+  // 禁用SSL验证（如果需要）
+  // requestHandler: {
+  //   httpsAgent: new (require('https').Agent)({
+  //     rejectUnauthorized: false
+  //   })
+  // }
 });
 const R2_BUCKET = process.env.R2_BUCKET;
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL; // 可选，若已开启
+
+// R2连接测试端点
+app.get('/api/test-r2', async (req, res) => {
+  try {
+    // 测试R2连接
+    await r2.send(new PutObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: 'test-connection.txt',
+      Body: 'test',
+      ContentType: 'text/plain',
+    }));
+    res.json({
+      success: true,
+      message: 'R2连接正常',
+      bucket: R2_BUCKET,
+      endpoint: process.env.R2_ENDPOINT,
+    });
+  } catch (error) {
+    console.error('R2连接测试失败:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      code: error.code,
+      bucket: R2_BUCKET,
+      endpoint: process.env.R2_ENDPOINT,
+    });
+  }
+});
 
 // 视频背景移除接口
 app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
   const userId = req.body.user_id;
   const fileName = req.file?.originalname;
   const fileSize = req.file?.size;
+  let tempPath = null;
 
   try {
     const estimatedDuration = Math.ceil(fileSize / (1024 * 1024 * 2));
@@ -58,7 +95,7 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
     // 处理视频文件
     const buffer = req.file.buffer;
     const tempFileName = `${Date.now()}-${fileName}`;
-    const tempPath = `/tmp/${tempFileName}`;
+    tempPath = `/tmp/${tempFileName}`;
     require('node:fs').writeFileSync(tempPath, buffer);
     // TODO: AI 处理逻辑...
     // 上传到 R2
@@ -83,7 +120,32 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
     });
   } catch (error) {
     console.error('视频背景移除失败:', error);
-    res.status(500).json({ error: '视频处理失败' });
+
+    // 清理临时文件（如果存在）
+    if (tempPath) {
+      try {
+        if (require('node:fs').existsSync(tempPath)) {
+          require('node:fs').unlinkSync(tempPath);
+        }
+      } catch (cleanupError) {
+        console.error('清理临时文件失败:', cleanupError);
+      }
+    }
+
+    // 根据错误类型返回不同的错误信息
+    let errorMessage = '视频处理失败';
+    if (error.code === 'EPROTO') {
+      errorMessage = '存储服务连接失败，请稍后重试';
+    } else if (error.code === 'ENOTFOUND') {
+      errorMessage = '存储服务不可用，请稍后重试';
+    } else if (error.code === 'ECONNREFUSED') {
+      errorMessage = '存储服务拒绝连接，请稍后重试';
+    }
+
+    res.status(500).json({
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
   }
 });
 
