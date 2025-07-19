@@ -129,6 +129,64 @@ app.post('/api/validate-duration', (req, res) => {
   res.json({ valid: true });
 });
 
+// 下载代理接口
+app.get('/api/download', async (req, res) => {
+  const { url } = req.query;
+
+  if (!url) {
+    return res.status(400).json({ error: 'Missing URL parameter' });
+  }
+
+  try {
+    // 验证URL是否来自我们的R2存储
+    const allowedDomains = [
+      'kalshiai.org',
+      'api.kalshiai.org',
+      'pub-*.r2.dev', // Cloudflare R2 公共域名模式
+    ];
+
+    const urlObj = new URL(url);
+    const isAllowed = allowedDomains.some((domain) => {
+      if (domain.includes('*')) {
+        const pattern = domain.replace('*', '.*');
+        return new RegExp(pattern).test(urlObj.hostname);
+      }
+      return urlObj.hostname === domain;
+    });
+
+    if (!isAllowed) {
+      return res.status(403).json({ error: 'Unauthorized domain' });
+    }
+
+    // 代理下载
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': req.headers['user-agent'] || 'KalshiAI/1.0',
+      },
+    });
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: `Failed to fetch: ${response.statusText}`,
+      });
+    }
+
+    const buffer = await response.arrayBuffer();
+    res.set({
+      'Content-Type': response.headers.get('content-type') || 'application/octet-stream',
+      'Content-Disposition': 'attachment; filename="processed_video.mp4"',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    });
+
+    res.send(require('node:buffer').Buffer.from(buffer));
+  } catch (error) {
+    console.error('Download proxy error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.warn(`Render backend API listening on port ${PORT}`);
