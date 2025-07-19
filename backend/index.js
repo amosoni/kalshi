@@ -36,15 +36,20 @@ const r2 = new S3Client({
   },
   // 添加SSL配置
   forcePathStyle: true,
-  // 禁用SSL验证（如果需要）
-  // requestHandler: {
-  //   httpsAgent: new (require('https').Agent)({
-  //     rejectUnauthorized: false
-  //   })
-  // }
+  // 添加更严格的SSL配置
+  requestHandler: {
+    httpsAgent: new (require('node:https').Agent)({
+      keepAlive: true,
+      maxSockets: 50,
+      timeout: 30000,
+      // 尝试解决SSL握手问题
+      rejectUnauthorized: true,
+      secureProtocol: 'TLSv1_2_method',
+    }),
+  },
 });
 const R2_BUCKET = process.env.R2_BUCKET;
-const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL; // 可选，若已开启
+// const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL; // 可选，若已开启（暂时注释）
 
 // R2连接测试端点
 app.get('/api/test-r2', async (req, res) => {
@@ -97,7 +102,25 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
     const tempFileName = `${Date.now()}-${fileName}`;
     tempPath = `/tmp/${tempFileName}`;
     require('node:fs').writeFileSync(tempPath, buffer);
-    // TODO: AI 处理逻辑...
+
+    // 临时：跳过R2上传，直接返回模拟结果
+    // TODO: 恢复AI处理逻辑和R2上传
+    console.warn(`临时模式：跳过R2上传，直接返回模拟结果`);
+
+    // 生成模拟的公网 URL（临时使用）
+    const mockResultUrl = `https://example.com/processed/${Date.now()}-${fileName}`;
+
+    // 清理临时文件
+    require('node:fs').unlinkSync(tempPath);
+    res.json({
+      success: true,
+      resultUrl: mockResultUrl,
+      duration: estimatedDuration,
+      cost: estimatedDuration,
+      message: '临时模式：视频处理完成（模拟结果）',
+    });
+
+    /* 原始R2上传逻辑（暂时注释）
     // 上传到 R2
     const r2Key = `${userId}/${Date.now()}-${fileName}`;
     await r2.send(new PutObjectCommand({
@@ -118,6 +141,7 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
       duration: estimatedDuration,
       cost: estimatedDuration,
     });
+    */
   } catch (error) {
     console.error('视频背景移除失败:', error);
 
