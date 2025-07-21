@@ -179,7 +179,7 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
         const predictionId = replicateData.id;
         // 轮询获取处理结果
         let outputUrl = null;
-        for (let i = 0; i < 120; i++) { // 最多等2分钟
+        for (let i = 0; i < 300; i++) { // 最多等5分钟
           await new Promise(r => setTimeout(r, 1000));
           const pollRes = await fetch(`https://api.replicate.com/v1/predictions/${predictionId}`, {
             headers: {
