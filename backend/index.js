@@ -2,7 +2,8 @@ const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const cors = require('cors');
 const express = require('express');
 const multer = require('multer');
-const fetch = require('node-fetch');
+
+// Node.js 18+ 内置 fetch，无需额外导入
 
 const upload = multer();
 
