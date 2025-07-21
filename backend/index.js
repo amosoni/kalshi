@@ -46,19 +46,7 @@ const r2 = new S3Client({
     accessKeyId: process.env.R2_ACCESS_KEY_ID,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
   },
-  // 添加SSL配置
   forcePathStyle: true,
-  // 添加更严格的SSL配置
-  requestHandler: {
-    httpsAgent: new (require('node:https').Agent)({
-      keepAlive: true,
-      maxSockets: 50,
-      timeout: 30000,
-      // 尝试解决SSL握手问题
-      rejectUnauthorized: true,
-      secureProtocol: 'TLSv1_2_method',
-    }),
-  },
 });
 const R2_BUCKET = process.env.R2_BUCKET;
 // const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL; // 可选，若已开启（暂时注释）
@@ -146,6 +134,10 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
       try {
         console.warn(`使用Replicate API进行背景移除...`);
 
+        // 将视频转换为base64编码
+        const videoBase64 = buffer.toString('base64');
+        const videoDataUrl = `data:video/mp4;base64,${videoBase64}`;
+
         // 调用Replicate API进行背景移除
         const replicateResponse = await fetch('https://api.replicate.com/v1/predictions', {
           method: 'POST',
@@ -156,7 +148,7 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
           body: JSON.stringify({
             version: 'fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec5c003',
             input: {
-              video: tempPath,
+              video: videoDataUrl,
               background: req.body.background_color || '#FFFFFF',
             },
           }),
@@ -191,10 +183,18 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
 
           // 下载处理后的视频
           if (result) {
-            const videoResponse = await fetch(result);
-            if (videoResponse.ok) {
-              processedVideoBuffer = await videoResponse.buffer();
-              console.warn(`AI背景移除完成，视频大小: ${processedVideoBuffer.length} bytes`);
+            try {
+              const videoResponse = await fetch(result, {
+                timeout: 30000, // 30秒超时
+              });
+              if (videoResponse.ok) {
+                processedVideoBuffer = await videoResponse.buffer();
+                console.warn(`AI背景移除完成，视频大小: ${processedVideoBuffer.length} bytes`);
+              } else {
+                console.warn(`下载处理后的视频失败: ${videoResponse.status}`);
+              }
+            } catch (downloadError) {
+              console.error('下载处理后的视频时出错:', downloadError);
             }
           }
         } else {
