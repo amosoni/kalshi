@@ -148,7 +148,7 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
           body: JSON.stringify({
             version: 'fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec5c003',
             input: {
-              video: videoDataUrl,
+              image: videoDataUrl,
               background: req.body.background_color || '#FFFFFF',
             },
           }),
@@ -198,6 +198,8 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
             }
           }
         } else {
+          const errorText = await replicateResponse.text();
+          console.error(`Replicate API错误: ${replicateResponse.status} - ${errorText}`);
           console.warn(`Replicate API调用失败，使用原始视频: ${replicateResponse.status}`);
         }
       } catch (aiError) {
