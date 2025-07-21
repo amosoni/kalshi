@@ -124,99 +124,131 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
     tempPath = `/tmp/${tempFileName}`;
     require('node:fs').writeFileSync(tempPath, buffer);
 
-    // AI视频背景移除处理
-    console.warn(`开始AI视频背景移除处理...`);
+    // 1. 先上传原始视频到 R2，获取公网 URL
+    const r2InputKey = `${userId}/input-${Date.now()}-${fileName}`;
+    let inputUrl = null;
+    let uploadInputSuccess = false;
+    let lastInputError = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        console.warn(`尝试上传原始视频到R2，第${attempt}次尝试...`);
+        await r2.send(new PutObjectCommand({
+          Bucket: R2_BUCKET,
+          Key: r2InputKey,
+          Body: buffer,
+          ContentType: req.file.mimetype || 'video/mp4',
+        }));
+        uploadInputSuccess = true;
+        console.warn(`R2原始视频上传成功，第${attempt}次尝试`);
+        break;
+      } catch (uploadError) {
+        lastInputError = uploadError;
+        console.error(`R2原始视频上传失败，第${attempt}次尝试:`, uploadError.message);
+        if (attempt < 3) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+    }
+    if (!uploadInputSuccess) {
+      throw lastInputError;
+    }
+    inputUrl = `https://${R2_BUCKET}.${process.env.R2_ENDPOINT.replace(/^https?:\/\//, '')}/${r2InputKey}`;
 
-    let processedVideoBuffer = buffer; // 默认使用原始视频
-
-    // 如果配置了Replicate API，则进行AI背景移除
+    // 2. 调用 Replicate 视频去背景模型
+    let processedVideoBuffer = buffer; // 默认用原视频
     if (process.env.REPLICATE_API_TOKEN) {
       try {
-        console.warn(`使用Replicate API进行背景移除...`);
-
-        // 暂时跳过AI处理，直接使用原始视频
-        console.warn(`暂时跳过AI处理，使用原始视频（模型兼容性问题）`);
-        processedVideoBuffer = buffer;
+        console.warn(`使用Replicate API进行视频背景移除...`);
+        const replicateResponse = await fetch('https://api.replicate.com/v1/predictions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Token ${process.env.REPLICATE_API_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            version: 'c18392381d1b5410b5a76b9b0c58db132526d3f79fe602e04e0d80cb668df509',
+            input: {
+              video: inputUrl,
+            },
+          }),
+        });
+        const replicateData = await replicateResponse.json();
+        if (!replicateResponse.ok) {
+          throw new Error(replicateData.detail || 'Replicate API 请求失败');
+        }
+        const predictionId = replicateData.id;
+        // 轮询获取处理结果
+        let outputUrl = null;
+        for (let i = 0; i < 120; i++) { // 最多等2分钟
+          await new Promise(r => setTimeout(r, 1000));
+          const pollRes = await fetch(`https://api.replicate.com/v1/predictions/${predictionId}`, {
+            headers: {
+              Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
+            },
+          });
+          const pollData = await pollRes.json();
+          if (pollData.status === 'succeeded' && pollData.output) {
+            outputUrl = Array.isArray(pollData.output) ? pollData.output[0] : pollData.output;
+            break;
+          } else if (pollData.status === 'failed') {
+            throw new Error(`Replicate 处理失败: ${pollData.error || '未知错误'}`);
+          }
+        }
+        if (!outputUrl) {
+          throw new Error('Replicate 处理超时');
+        }
+        // 3. 下载处理后的视频
+        const outputRes = await fetch(outputUrl);
+        if (!outputRes.ok) {
+          throw new Error('下载处理后视频失败');
+        }
+        processedVideoBuffer = require('node:buffer').Buffer.from(await outputRes.arrayBuffer());
       } catch (aiError) {
         console.error('AI处理错误，使用原始视频:', aiError);
-        // 如果AI处理失败，继续使用原始视频
       }
     } else {
       console.warn(`未配置REPLICATE_API_TOKEN，跳过AI处理`);
     }
 
-    // 检查R2配置
-    if (!process.env.R2_ENDPOINT || !process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY || !R2_BUCKET) {
-      // 模拟模式：返回临时URL
-      console.warn('使用模拟模式，返回临时视频URL');
-      const resultUrl = `https://api.kalshiai.org/api/temp-video/${tempFileName}`;
-
-      // 设置定时清理
-      setTimeout(() => {
-        try {
-          if (require('node:fs').existsSync(tempPath)) {
-            require('node:fs').unlinkSync(tempPath);
-            console.warn(`清理临时文件: ${tempPath}`);
-          }
-        } catch (cleanupError) {
-          console.error('清理临时文件失败:', cleanupError);
-        }
-      }, 5 * 60 * 1000); // 5分钟后清理
-
-      res.json({
-        success: true,
-        resultUrl,
-        duration: estimatedDuration,
-        cost: estimatedDuration,
-        message: '模拟模式：视频处理完成（请配置R2存储以启用完整功能）',
-      });
-    } else {
-      // 正常模式：上传到 R2 存储
-      const r2Key = `${userId}/${Date.now()}-${fileName}`;
-
-      // 添加重试机制
-      let uploadSuccess = false;
-      let lastError = null;
-
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        try {
-          console.warn(`尝试上传到R2，第${attempt}次尝试...`);
-          await r2.send(new PutObjectCommand({
-            Bucket: R2_BUCKET,
-            Key: r2Key,
-            Body: processedVideoBuffer,
-            ContentType: req.file.mimetype || 'video/mp4',
-          }));
-          uploadSuccess = true;
-          console.warn(`R2上传成功，第${attempt}次尝试`);
-          break;
-        } catch (uploadError) {
-          lastError = uploadError;
-          console.error(`R2上传失败，第${attempt}次尝试:`, uploadError.message);
-          if (attempt < 3) {
-            await new Promise(resolve => setTimeout(resolve, 2000)); // 等待2秒后重试
-          }
+    // 4. 上传处理后视频到 R2
+    const r2Key = `${userId}/${Date.now()}-processed-${fileName}`;
+    let uploadSuccess = false;
+    let lastError = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        console.warn(`尝试上传处理后视频到R2，第${attempt}次尝试...`);
+        await r2.send(new PutObjectCommand({
+          Bucket: R2_BUCKET,
+          Key: r2Key,
+          Body: processedVideoBuffer,
+          ContentType: req.file.mimetype || 'video/mp4',
+        }));
+        uploadSuccess = true;
+        console.warn(`R2处理后视频上传成功，第${attempt}次尝试`);
+        break;
+      } catch (uploadError) {
+        lastError = uploadError;
+        console.error(`R2处理后视频上传失败，第${attempt}次尝试:`, uploadError.message);
+        if (attempt < 3) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
         }
       }
-
-      if (!uploadSuccess) {
-        throw lastError;
-      }
-
-      // 生成公网 URL
-      const resultUrl = `https://${R2_BUCKET}.${process.env.R2_ENDPOINT.replace(/^https?:\/\//, '')}/${r2Key}`;
-
-      // 清理临时文件
-      require('node:fs').unlinkSync(tempPath);
-
-      res.json({
-        success: true,
-        resultUrl,
-        duration: estimatedDuration,
-        cost: estimatedDuration,
-        message: '视频背景移除处理完成',
-      });
     }
+    if (!uploadSuccess) {
+      throw lastError;
+    }
+    const resultUrl = `https://${R2_BUCKET}.${process.env.R2_ENDPOINT.replace(/^https?:\/\//, '')}/${r2Key}`;
+
+    // 清理临时文件
+    require('node:fs').unlinkSync(tempPath);
+
+    res.json({
+      success: true,
+      resultUrl,
+      duration: estimatedDuration,
+      cost: estimatedDuration,
+      message: '视频背景移除处理完成',
+    });
   } catch (error) {
     console.error('视频背景移除失败:', error);
 
