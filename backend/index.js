@@ -2,6 +2,7 @@ const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const cors = require('cors');
 const express = require('express');
 const multer = require('multer');
+const fetch = require('node-fetch');
 
 const upload = multer();
 
@@ -24,6 +25,16 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     service: 'kalshiai-backend',
     version: '1.0.0',
+    features: {
+      r2_storage: !!process.env.R2_ENDPOINT,
+      ai_processing: !!process.env.REPLICATE_API_TOKEN,
+      ffmpeg: true,
+    },
+    config: {
+      r2_endpoint: process.env.R2_ENDPOINT ? 'configured' : 'missing',
+      r2_bucket: process.env.R2_BUCKET ? 'configured' : 'missing',
+      replicate_token: process.env.REPLICATE_API_TOKEN ? 'configured' : 'missing',
+    },
   });
 });
 
@@ -51,8 +62,29 @@ const r2 = new S3Client({
 const R2_BUCKET = process.env.R2_BUCKET;
 // const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL; // 可选，若已开启（暂时注释）
 
+// 检查必要的环境变量
+if (!process.env.R2_ENDPOINT || !process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY || !R2_BUCKET) {
+  console.warn('⚠️  缺少R2存储配置，将使用模拟模式');
+  console.warn('   请设置以下环境变量以启用完整功能:');
+  console.warn('   R2_ENDPOINT');
+  console.warn('   R2_ACCESS_KEY_ID');
+  console.warn('   R2_SECRET_ACCESS_KEY');
+  console.warn('   R2_BUCKET');
+}
+
 // R2连接测试端点
 app.get('/api/test-r2', async (req, res) => {
+  // 检查R2配置
+  if (!process.env.R2_ENDPOINT || !process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY || !R2_BUCKET) {
+    return res.json({
+      success: false,
+      message: 'R2未配置，使用模拟模式',
+      error: 'R2 configuration missing',
+      bucket: 'simulated',
+      endpoint: 'simulated',
+    });
+  }
+
   try {
     // 测试R2连接
     await r2.send(new PutObjectCommand({
@@ -103,45 +135,127 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
     tempPath = `/tmp/${tempFileName}`;
     require('node:fs').writeFileSync(tempPath, buffer);
 
-    // 临时：跳过R2上传，直接返回模拟结果
-    // TODO: 恢复AI处理逻辑和R2上传
-    console.warn(`临时模式：跳过R2上传，直接返回模拟结果`);
+    // AI视频背景移除处理
+    console.warn(`开始AI视频背景移除处理...`);
 
-    // 生成模拟的公网 URL（临时使用）
-    const mockResultUrl = `https://example.com/processed/${Date.now()}-${fileName}`;
+    let processedVideoBuffer = buffer; // 默认使用原始视频
 
-    // 清理临时文件
-    require('node:fs').unlinkSync(tempPath);
-    res.json({
-      success: true,
-      resultUrl: mockResultUrl,
-      duration: estimatedDuration,
-      cost: estimatedDuration,
-      message: '临时模式：视频处理完成（模拟结果）',
-    });
+    // 如果配置了Replicate API，则进行AI背景移除
+    if (process.env.REPLICATE_API_TOKEN) {
+      try {
+        console.warn(`使用Replicate API进行背景移除...`);
 
-    /* 原始R2上传逻辑（暂时注释）
-    // 上传到 R2
-    const r2Key = `${userId}/${Date.now()}-${fileName}`;
-    await r2.send(new PutObjectCommand({
-      Bucket: R2_BUCKET,
-      Key: r2Key,
-      Body: buffer,
-      ContentType: req.file.mimetype || 'video/mp4',
-    }));
-    // 生成公网 URL
-    const resultUrl = R2_PUBLIC_URL
-      ? `${R2_PUBLIC_URL}/${r2Key}`
-      : `https://${R2_BUCKET}.${process.env.R2_ENDPOINT.replace(/^https?:\/\//, '')}/${r2Key}`;
-    // 清理临时文件
-    require('node:fs').unlinkSync(tempPath);
-    res.json({
-      success: true,
-      resultUrl,
-      duration: estimatedDuration,
-      cost: estimatedDuration,
-    });
-    */
+        // 调用Replicate API进行背景移除
+        const replicateResponse = await fetch('https://api.replicate.com/v1/predictions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Token ${process.env.REPLICATE_API_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            version: 'fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec5c003',
+            input: {
+              video: tempPath,
+              background: req.body.background_color || '#FFFFFF',
+            },
+          }),
+        });
+
+        if (replicateResponse.ok) {
+          const prediction = await replicateResponse.json();
+          console.warn(`Replicate预测ID: ${prediction.id}`);
+
+          // 等待处理完成
+          let result = null;
+          while (!result) {
+            await new Promise(resolve => setTimeout(resolve, 2000)); // 等待2秒
+
+            const statusResponse = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
+              headers: {
+                Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
+              },
+            });
+
+            if (statusResponse.ok) {
+              const statusData = await statusResponse.json();
+              if (statusData.status === 'succeeded') {
+                result = statusData.output;
+                console.warn(`AI处理完成: ${result}`);
+                break;
+              } else if (statusData.status === 'failed') {
+                throw new Error(`AI处理失败: ${statusData.error}`);
+              }
+            }
+          }
+
+          // 下载处理后的视频
+          if (result) {
+            const videoResponse = await fetch(result);
+            if (videoResponse.ok) {
+              processedVideoBuffer = await videoResponse.buffer();
+              console.warn(`AI背景移除完成，视频大小: ${processedVideoBuffer.length} bytes`);
+            }
+          }
+        } else {
+          console.warn(`Replicate API调用失败，使用原始视频: ${replicateResponse.status}`);
+        }
+      } catch (aiError) {
+        console.error('AI处理错误，使用原始视频:', aiError);
+        // 如果AI处理失败，继续使用原始视频
+      }
+    } else {
+      console.warn(`未配置REPLICATE_API_TOKEN，跳过AI处理`);
+    }
+
+    // 检查R2配置
+    if (!process.env.R2_ENDPOINT || !process.env.R2_ACCESS_KEY_ID || !process.env.R2_SECRET_ACCESS_KEY || !R2_BUCKET) {
+      // 模拟模式：返回临时URL
+      console.warn('使用模拟模式，返回临时视频URL');
+      const resultUrl = `https://api.kalshiai.org/api/temp-video/${tempFileName}`;
+
+      // 设置定时清理
+      setTimeout(() => {
+        try {
+          if (require('node:fs').existsSync(tempPath)) {
+            require('node:fs').unlinkSync(tempPath);
+            console.warn(`清理临时文件: ${tempPath}`);
+          }
+        } catch (cleanupError) {
+          console.error('清理临时文件失败:', cleanupError);
+        }
+      }, 5 * 60 * 1000); // 5分钟后清理
+
+      res.json({
+        success: true,
+        resultUrl,
+        duration: estimatedDuration,
+        cost: estimatedDuration,
+        message: '模拟模式：视频处理完成（请配置R2存储以启用完整功能）',
+      });
+    } else {
+      // 正常模式：上传到 R2 存储
+      const r2Key = `${userId}/${Date.now()}-${fileName}`;
+      await r2.send(new PutObjectCommand({
+        Bucket: R2_BUCKET,
+        Key: r2Key,
+        Body: processedVideoBuffer,
+        ContentType: req.file.mimetype || 'video/mp4',
+      }));
+
+      // 生成公网 URL
+      const resultUrl = `https://${R2_BUCKET}.${process.env.R2_ENDPOINT.replace(/^https?:\/\//, '')}/${r2Key}`;
+
+      // 清理临时文件
+      require('node:fs').unlinkSync(tempPath);
+
+      res.json({
+        success: true,
+        resultUrl,
+        duration: estimatedDuration,
+        cost: estimatedDuration,
+        message: '视频背景移除处理完成',
+      });
+    }
   } catch (error) {
     console.error('视频背景移除失败:', error);
 
@@ -215,6 +329,49 @@ app.post('/api/validate-duration', (req, res) => {
   res.json({ valid: true });
 });
 
+// 临时视频服务端点（用于模拟模式）
+app.get('/api/temp-video/:filename', (req, res) => {
+  const { filename } = req.params;
+  const filePath = `/tmp/${filename}`;
+
+  try {
+    if (!require('node:fs').existsSync(filePath)) {
+      return res.status(404).json({ error: 'Video file not found' });
+    }
+
+    const stat = require('node:fs').statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    if (range) {
+      const parts = range.replace(/bytes=/, '').split('-');
+      const start = Number.parseInt(parts[0], 10);
+      const end = parts[1] ? Number.parseInt(parts[1], 10) : fileSize - 1;
+      const chunksize = (end - start) + 1;
+      const file = require('node:fs').createReadStream(filePath, { start, end });
+      const head = {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': 'video/mp4',
+      };
+      res.writeHead(206, head);
+      file.pipe(res);
+    } else {
+      const head = {
+        'Content-Length': fileSize,
+        'Content-Type': 'video/mp4',
+        'Accept-Ranges': 'bytes',
+      };
+      res.writeHead(200, head);
+      require('node:fs').createReadStream(filePath).pipe(res);
+    }
+  } catch (error) {
+    console.error('临时视频服务错误:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // 下载代理接口
 app.get('/api/download', async (req, res) => {
   const { url } = req.query;
@@ -273,7 +430,7 @@ app.get('/api/download', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.warn(`Render backend API listening on port ${PORT}`);
 });

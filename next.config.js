@@ -13,6 +13,12 @@ module.exports = {
         source: '/api/download',
         destination: 'https://api.kalshiai.org/api/download',
       },
+      // 临时视频服务API也代理到Render（用于模拟模式）
+      {
+        source: '/api/temp-video/:path*',
+        destination: 'https://api.kalshiai.org/api/temp-video/:path*',
+      },
+
       // 积分API保留在Vercel，不代理到Render
       // {
       //   source: '/api/points/:path*',
