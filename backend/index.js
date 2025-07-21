@@ -134,74 +134,9 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
       try {
         console.warn(`使用Replicate API进行背景移除...`);
 
-        // 将视频转换为base64编码
-        const videoBase64 = buffer.toString('base64');
-        const videoDataUrl = `data:video/mp4;base64,${videoBase64}`;
-
-        // 调用Replicate API进行背景移除
-        const replicateResponse = await fetch('https://api.replicate.com/v1/predictions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Token ${process.env.REPLICATE_API_TOKEN}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            version: 'fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec5c003',
-            input: {
-              image: videoDataUrl,
-              background: req.body.background_color || '#FFFFFF',
-            },
-          }),
-        });
-
-        if (replicateResponse.ok) {
-          const prediction = await replicateResponse.json();
-          console.warn(`Replicate预测ID: ${prediction.id}`);
-
-          // 等待处理完成
-          let result = null;
-          while (!result) {
-            await new Promise(resolve => setTimeout(resolve, 2000)); // 等待2秒
-
-            const statusResponse = await fetch(`https://api.replicate.com/v1/predictions/${prediction.id}`, {
-              headers: {
-                Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
-              },
-            });
-
-            if (statusResponse.ok) {
-              const statusData = await statusResponse.json();
-              if (statusData.status === 'succeeded') {
-                result = statusData.output;
-                console.warn(`AI处理完成: ${result}`);
-                break;
-              } else if (statusData.status === 'failed') {
-                throw new Error(`AI处理失败: ${statusData.error}`);
-              }
-            }
-          }
-
-          // 下载处理后的视频
-          if (result) {
-            try {
-              const videoResponse = await fetch(result, {
-                timeout: 30000, // 30秒超时
-              });
-              if (videoResponse.ok) {
-                processedVideoBuffer = await videoResponse.buffer();
-                console.warn(`AI背景移除完成，视频大小: ${processedVideoBuffer.length} bytes`);
-              } else {
-                console.warn(`下载处理后的视频失败: ${videoResponse.status}`);
-              }
-            } catch (downloadError) {
-              console.error('下载处理后的视频时出错:', downloadError);
-            }
-          }
-        } else {
-          const errorText = await replicateResponse.text();
-          console.error(`Replicate API错误: ${replicateResponse.status} - ${errorText}`);
-          console.warn(`Replicate API调用失败，使用原始视频: ${replicateResponse.status}`);
-        }
+        // 暂时跳过AI处理，直接使用原始视频
+        console.warn(`暂时跳过AI处理，使用原始视频（模型兼容性问题）`);
+        processedVideoBuffer = buffer;
       } catch (aiError) {
         console.error('AI处理错误，使用原始视频:', aiError);
         // 如果AI处理失败，继续使用原始视频
@@ -238,12 +173,35 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
     } else {
       // 正常模式：上传到 R2 存储
       const r2Key = `${userId}/${Date.now()}-${fileName}`;
-      await r2.send(new PutObjectCommand({
-        Bucket: R2_BUCKET,
-        Key: r2Key,
-        Body: processedVideoBuffer,
-        ContentType: req.file.mimetype || 'video/mp4',
-      }));
+
+      // 添加重试机制
+      let uploadSuccess = false;
+      let lastError = null;
+
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          console.warn(`尝试上传到R2，第${attempt}次尝试...`);
+          await r2.send(new PutObjectCommand({
+            Bucket: R2_BUCKET,
+            Key: r2Key,
+            Body: processedVideoBuffer,
+            ContentType: req.file.mimetype || 'video/mp4',
+          }));
+          uploadSuccess = true;
+          console.warn(`R2上传成功，第${attempt}次尝试`);
+          break;
+        } catch (uploadError) {
+          lastError = uploadError;
+          console.error(`R2上传失败，第${attempt}次尝试:`, uploadError.message);
+          if (attempt < 3) {
+            await new Promise(resolve => setTimeout(resolve, 2000)); // 等待2秒后重试
+          }
+        }
+      }
+
+      if (!uploadSuccess) {
+        throw lastError;
+      }
 
       // 生成公网 URL
       const resultUrl = `https://${R2_BUCKET}.${process.env.R2_ENDPOINT.replace(/^https?:\/\//, '')}/${r2Key}`;
