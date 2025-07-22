@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { apiUrl } from '@/utils/api';
+import { usePoints } from '../hooks/usePoints';
 import { useUser } from '../hooks/useUser';
 
 const COLORS = [
@@ -20,6 +21,7 @@ type UploadAndRemoveBgProps = {
 
 export default function UploadAndRemoveBg({ title = 'Upload Video', glass = false }: UploadAndRemoveBgProps) {
   const user = useUser();
+  const { refetch: refetchPoints } = usePoints();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedVideoUrl, setProcessedVideoUrl] = useState<string | null>(null);
@@ -55,6 +57,25 @@ export default function UploadAndRemoveBg({ title = 'Upload Video', glass = fals
       const data = await res.json();
       if (res.ok && data.resultUrl) {
         setProcessedVideoUrl(data.resultUrl);
+        // 处理成功后自动按 cost 扣除积分
+        try {
+          await fetch(apiUrl('/api/points/consume'), {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}),
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              amount: data.cost, // 按后端返回的 cost（秒数）扣除积分
+              description: `视频去背景处理，时长${data.duration}秒`,
+            }),
+          });
+          // 积分消耗后自动刷新余额
+          refetchPoints();
+        } catch (consumeError) {
+          console.error('积分扣除失败:', consumeError);
+        }
       } else {
         setError(data.error || 'Failed to process video.');
       }
