@@ -242,6 +242,7 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
     // 清理临时文件
     require('node:fs').unlinkSync(tempPath);
 
+    console.warn('即将返回响应', { resultUrl, duration: estimatedDuration, cost: estimatedDuration });
     res.json({
       success: true,
       resultUrl,
@@ -262,6 +263,7 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
       }
     }
     // 返回标准 JSON 错误响应
+    console.warn('即将返回错误响应', error);
     res.status(500).json({
       error: '视频处理失败',
       details: process.env.NODE_ENV === 'development' ? (error && error.message ? error.message : String(error)) : undefined,
