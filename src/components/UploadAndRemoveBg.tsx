@@ -72,7 +72,7 @@ export default function UploadAndRemoveBg({ title = 'Upload Video', glass = fals
         const link = document.createElement('a');
         link.href = processedVideoUrl;
         link.download = `processed_${uploadedFile?.name || 'video.mp4'}`;
-        link.target = '_blank'; // 在新标签页打开，避免跨域问题
+        // link.target = '_blank'; // 移除新标签页打开，确保直接下载
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -107,7 +107,7 @@ export default function UploadAndRemoveBg({ title = 'Upload Video', glass = fals
 
   return (
     <div className="w-full flex justify-center py-12">
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-8">
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-8 pr-12">
         {/* 左卡片：上传与生成 */}
         <div className={`backdrop-blur-lg ${glass ? 'bg-white/20' : 'bg-white/60'} rounded-3xl p-6 shadow-xl flex flex-col justify-center items-center`} style={{ minHeight: 480, maxHeight: 540, height: '100%', width: 420 }}>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{title}</h2>
@@ -236,7 +236,7 @@ export default function UploadAndRemoveBg({ title = 'Upload Video', glass = fals
 
         {/* 右卡片：生成结果与下载，仅在有结果时显示 */}
         {processedVideoUrl && (
-          <div className="backdrop-blur-lg bg-white/60 rounded-3xl p-6 shadow-xl flex flex-col justify-center items-center" style={{ minHeight: 480, maxHeight: 540, height: '100%', width: 420 }}>
+          <div className="backdrop-blur-lg bg-white/60 rounded-3xl p-6 shadow-xl flex flex-col justify-center items-center" style={{ minHeight: 480, maxHeight: 540, height: '100%', width: 420, marginRight: 32 }}>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Processed Result</h2>
             <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 mb-4 w-full flex justify-center">
               <video
