@@ -251,7 +251,6 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
     });
   } catch (error) {
     console.error('视频背景移除失败:', error);
-
     // 清理临时文件（如果存在）
     if (tempPath) {
       try {
@@ -262,20 +261,10 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
         console.error('清理临时文件失败:', cleanupError);
       }
     }
-
-    // 根据错误类型返回不同的错误信息
-    let errorMessage = '视频处理失败';
-    if (error.code === 'EPROTO') {
-      errorMessage = '存储服务连接失败，请稍后重试';
-    } else if (error.code === 'ENOTFOUND') {
-      errorMessage = '存储服务不可用，请稍后重试';
-    } else if (error.code === 'ECONNREFUSED') {
-      errorMessage = '存储服务拒绝连接，请稍后重试';
-    }
-
+    // 返回标准 JSON 错误响应
     res.status(500).json({
-      error: errorMessage,
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: '视频处理失败',
+      details: process.env.NODE_ENV === 'development' ? (error && error.message ? error.message : String(error)) : undefined,
     });
   }
 });
