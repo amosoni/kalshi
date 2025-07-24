@@ -1,8 +1,8 @@
 # 基于官方 Node 18 镜像
 FROM node:18
 
-# 安装 ffmpeg
-RUN apt-get update && apt-get install -y ffmpeg
+# 安装 ffmpeg 并验证安装成功，清理缓存
+RUN apt-get update && apt-get install -y ffmpeg && ffmpeg -version && rm -rf /var/lib/apt/lists/*
 
 # 设置工作目录
 WORKDIR /app
