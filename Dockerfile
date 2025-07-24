@@ -1,8 +1,8 @@
 # 基于官方 Node 18 镜像
 FROM node:18
 
-# 安装 ffmpeg（包含 ffprobe）
-RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+# 安装 ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg
 
 # 设置工作目录
 WORKDIR /app
