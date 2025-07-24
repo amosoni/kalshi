@@ -216,7 +216,7 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
             ffmpeg()
               .input(tmpInput)
               .complexFilter([
-                `[0:v]format=rgba[video];color=${bgColor}:s=iwxih[bg];[bg][video]overlay=format=auto:shortest=1[out]`,
+                `[0:v]format=rgba[video];color=${bgColor}:s=iw:ih[bg];[bg][video]overlay=format=auto:shortest=1[out]`,
               ])
               .outputOptions('-map', '[out]')
               .outputOptions('-c:v', 'libx264')
