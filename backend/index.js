@@ -203,6 +203,38 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
           throw new Error('下载处理后视频失败');
         }
         processedVideoBuffer = require('node:buffer').Buffer.from(await outputRes.arrayBuffer());
+
+        // 检查是否需要加纯色背景
+        const bgColor = req.body.background_color || '#FFFFFF';
+        if (bgColor && bgColor !== 'transparent' && bgColor !== '#00000000') {
+          // 用 ffmpeg 给透明背景视频加纯色底色
+          const ffmpeg = require('fluent-ffmpeg');
+          const tmpInput = `/tmp/bg_input_${Date.now()}.mp4`;
+          const tmpOutput = `/tmp/bg_output_${Date.now()}.mp4`;
+          require('node:fs').writeFileSync(tmpInput, processedVideoBuffer);
+          await new Promise((resolve, reject) => {
+            ffmpeg()
+              .input(tmpInput)
+              .complexFilter([
+                `[0:v]format=rgba[video];color=${bgColor}:s=iwxih[bg];[bg][video]overlay=format=auto:shortest=1[out]`,
+              ])
+              .outputOptions('-map', '[out]')
+              .outputOptions('-c:v', 'libx264')
+              .outputOptions('-pix_fmt', 'yuv420p')
+              .save(tmpOutput)
+              .on('end', () => {
+                processedVideoBuffer = require('node:fs').readFileSync(tmpOutput);
+                require('node:fs').unlinkSync(tmpInput);
+                require('node:fs').unlinkSync(tmpOutput);
+                resolve();
+              })
+              .on('error', (err) => {
+                console.error('ffmpeg 添加纯色背景失败:', err);
+                require('node:fs').unlinkSync(tmpInput);
+                reject(err);
+              });
+          });
+        }
       } catch (aiError) {
         console.error('AI处理错误，使用原始视频:', aiError);
       }
@@ -264,7 +296,12 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
     }
     // 返回标准 JSON 错误响应
     console.warn('即将返回错误响应', error);
-    res.status(500).json({
+    res.status(500).set({
+      'Access-Control-Allow-Origin': 'https://kalshiai.org',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+    }).json({
       error: '视频处理失败',
       details: process.env.NODE_ENV === 'development' ? (error && error.message ? error.message : String(error)) : undefined,
     });
