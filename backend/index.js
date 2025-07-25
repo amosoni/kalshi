@@ -208,12 +208,33 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
         if (!outputRes.ok) {
           throw new Error('下载处理后视频失败');
         }
-        // 用流直接写入临时文件，避免全部加载到内存
+        // 兼容 Node 18+ 原生 fetch 的 Web Stream
+        const { Readable } = require('node:stream');
+        let nodeStream;
+        if (outputRes.body && typeof outputRes.body.getReader === 'function') {
+          // Web Streams API
+          const reader = outputRes.body.getReader();
+          nodeStream = new Readable({
+            async read() {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                  break;
+                }
+                this.push(require('node:buffer').Buffer.from(value));
+              }
+              this.push(null);
+            },
+          });
+        } else {
+          // node-fetch v2/v3
+          nodeStream = outputRes.body;
+        }
         const processedTmpPath = `/tmp/processed_${Date.now()}.mp4`;
         const dest = require('node:fs').createWriteStream(processedTmpPath);
         await new Promise((resolve, reject) => {
-          outputRes.body.pipe(dest);
-          outputRes.body.on('error', reject);
+          nodeStream.pipe(dest);
+          nodeStream.on('error', reject);
           dest.on('finish', resolve);
         });
         // 检查是否需要加纯色背景
