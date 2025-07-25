@@ -161,7 +161,7 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
     inputUrl = `https://${R2_BUCKET}.${process.env.R2_ENDPOINT.replace(/^https?:\/\//, '')}/${r2InputKey}`;
 
     // 2. 调用 Replicate 视频去背景模型
-    let processedVideoBuffer = buffer; // 默认用原视频
+    const processedVideoBuffer = buffer; // 默认用原视频
     if (process.env.REPLICATE_API_TOKEN) {
       try {
         console.warn(`使用Replicate API进行视频背景移除...`);
@@ -208,19 +208,23 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
         if (!outputRes.ok) {
           throw new Error('下载处理后视频失败');
         }
-        processedVideoBuffer = require('node:buffer').Buffer.from(await outputRes.arrayBuffer());
-
+        // 用流直接写入临时文件，避免全部加载到内存
+        const processedTmpPath = `/tmp/processed_${Date.now()}.mp4`;
+        const dest = require('node:fs').createWriteStream(processedTmpPath);
+        await new Promise((resolve, reject) => {
+          outputRes.body.pipe(dest);
+          outputRes.body.on('error', reject);
+          dest.on('finish', resolve);
+        });
         // 检查是否需要加纯色背景
         const bgColor = req.body.background_color || '#FFFFFF';
         if (bgColor && bgColor !== 'transparent' && bgColor !== '#00000000') {
           // 用 ffmpeg 给透明背景视频加纯色底色
           const ffmpeg = require('fluent-ffmpeg');
-          const tmpInput = `/tmp/bg_input_${Date.now()}.mp4`;
           const tmpOutput = `/tmp/bg_output_${Date.now()}.mp4`;
-          require('node:fs').writeFileSync(tmpInput, processedVideoBuffer);
           await new Promise((resolve, reject) => {
             ffmpeg()
-              .input(tmpInput)
+              .input(processedTmpPath)
               .complexFilter([
                 `color=${bgColor}@1.0:size=1920x1080:d=1[bg];[0:v][bg]scale2ref[vid][bg2];[bg2][vid]overlay=format=auto:shortest=1[out]`,
               ])
@@ -229,16 +233,91 @@ app.post('/api/remove-bg', upload.single('file'), async (req, res) => {
               .outputOptions('-pix_fmt', 'yuv420p')
               .save(tmpOutput)
               .on('end', () => {
-                processedVideoBuffer = require('node:fs').readFileSync(tmpOutput);
-                require('node:fs').unlinkSync(tmpInput);
-                require('node:fs').unlinkSync(tmpOutput);
+                require('node:fs').unlinkSync(processedTmpPath);
                 resolve();
               })
               .on('error', (err) => {
                 console.error('ffmpeg 添加纯色背景失败:', err);
-                require('node:fs').unlinkSync(tmpInput);
+                require('node:fs').unlinkSync(processedTmpPath);
                 reject(err);
               });
+          });
+          // 上传处理后的视频到 R2
+          const r2Key = `${userId}/${Date.now()}-processed-${fileName}`;
+          let uploadSuccess = false;
+          let lastError = null;
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+              console.warn(`尝试上传处理后视频到R2，第${attempt}次尝试...`);
+              await r2.send(new PutObjectCommand({
+                Bucket: R2_BUCKET,
+                Key: r2Key,
+                Body: require('node:fs').createReadStream(tmpOutput),
+                ContentType: req.file.mimetype || 'video/mp4',
+              }));
+              uploadSuccess = true;
+              console.warn(`R2处理后视频上传成功，第${attempt}次尝试`);
+              break;
+            } catch (uploadError) {
+              lastError = uploadError;
+              console.error(`R2处理后视频上传失败，第${attempt}次尝试:`, uploadError.message);
+              if (attempt < 3) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+              }
+            }
+          }
+          if (!uploadSuccess) {
+            throw lastError;
+          }
+          const resultUrl = `https://${R2_BUCKET}.${process.env.R2_ENDPOINT.replace(/^https?:\/\//, '')}/${r2Key}`;
+          require('node:fs').unlinkSync(tmpOutput);
+          require('node:fs').unlinkSync(tempPath);
+          console.warn('即将返回响应', { resultUrl, duration: estimatedDuration, cost: estimatedDuration });
+          return res.json({
+            success: true,
+            resultUrl,
+            duration: estimatedDuration,
+            cost: estimatedDuration,
+            message: '视频背景移除处理完成',
+          });
+        } else {
+          // 不加底色，直接上传 processedTmpPath
+          const r2Key = `${userId}/${Date.now()}-processed-${fileName}`;
+          let uploadSuccess = false;
+          let lastError = null;
+          for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+              console.warn(`尝试上传处理后视频到R2，第${attempt}次尝试...`);
+              await r2.send(new PutObjectCommand({
+                Bucket: R2_BUCKET,
+                Key: r2Key,
+                Body: require('node:fs').createReadStream(processedTmpPath),
+                ContentType: req.file.mimetype || 'video/mp4',
+              }));
+              uploadSuccess = true;
+              console.warn(`R2处理后视频上传成功，第${attempt}次尝试`);
+              break;
+            } catch (uploadError) {
+              lastError = uploadError;
+              console.error(`R2处理后视频上传失败，第${attempt}次尝试:`, uploadError.message);
+              if (attempt < 3) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+              }
+            }
+          }
+          if (!uploadSuccess) {
+            throw lastError;
+          }
+          const resultUrl = `https://${R2_BUCKET}.${process.env.R2_ENDPOINT.replace(/^https?:\/\//, '')}/${r2Key}`;
+          require('node:fs').unlinkSync(processedTmpPath);
+          require('node:fs').unlinkSync(tempPath);
+          console.warn('即将返回响应', { resultUrl, duration: estimatedDuration, cost: estimatedDuration });
+          return res.json({
+            success: true,
+            resultUrl,
+            duration: estimatedDuration,
+            cost: estimatedDuration,
+            message: '视频背景移除处理完成',
           });
         }
       } catch (aiError) {
