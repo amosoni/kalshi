@@ -1,3 +1,9 @@
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection:', reason);
+});
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const cors = require('cors');
 const express = require('express');
@@ -452,6 +458,6 @@ app.get('/api/download', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.warn(`Render backend API listening on port ${PORT}`);
 });
