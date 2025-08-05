@@ -7,7 +7,7 @@ export async function OPTIONS() {
   return new Response(null, {
     status: 204,
     headers: {
-      'Access-Control-Allow-Origin': 'https://kalshiai.org',
+      'Access-Control-Allow-Origin': 'https://www.kalshiai.org',
       'Access-Control-Allow-Methods': 'POST,OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Allow-Credentials': 'true',
@@ -34,14 +34,14 @@ export async function POST(req: NextRequest) {
     if (!user) {
       console.error('LOGIN: user not found');
       const res = NextResponse.json({ error: 'Invalid credentials', reason: 'user_not_found' }, { status: 401 });
-      res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
+      res.headers.set('Access-Control-Allow-Origin', 'https://www.kalshiai.org');
       res.headers.set('Access-Control-Allow-Credentials', 'true');
       return res;
     }
     if (!user.password) {
       console.error('LOGIN: user.password is empty or null');
       const res = NextResponse.json({ error: 'Invalid credentials', reason: 'no_password' }, { status: 401 });
-      res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
+      res.headers.set('Access-Control-Allow-Origin', 'https://www.kalshiai.org');
       res.headers.set('Access-Control-Allow-Credentials', 'true');
       return res;
     }
@@ -55,19 +55,19 @@ export async function POST(req: NextRequest) {
     console.error('LOGIN password valid:', isValid, 'user.password:', user.password);
     if (!isValid) {
       const res = NextResponse.json({ error: 'Invalid credentials', reason: 'password_invalid' }, { status: 401 });
-      res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
+      res.headers.set('Access-Control-Allow-Origin', 'https://www.kalshiai.org');
       res.headers.set('Access-Control-Allow-Credentials', 'true');
       return res;
     }
     // 登录成功，返回用户信息（不含密码）
     const res = NextResponse.json({ success: true, user: { id: user.id, username: user.username, email: user.email } }, { status: 200 });
-    res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
+    res.headers.set('Access-Control-Allow-Origin', 'https://www.kalshiai.org');
     res.headers.set('Access-Control-Allow-Credentials', 'true');
     return res;
   } catch (err: any) {
     console.error('LOGIN: catch error', err);
     const res = NextResponse.json({ error: err.message || 'Internal server error', reason: 'exception' }, { status: 500 });
-    res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
+    res.headers.set('Access-Control-Allow-Origin', 'https://www.kalshiai.org');
     res.headers.set('Access-Control-Allow-Credentials', 'true');
     return res;
   }

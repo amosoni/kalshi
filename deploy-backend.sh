@@ -135,7 +135,7 @@ server {
     }
 
     location / {
-        return 301 https://kalshiai.org$request_uri;
+        return 301 https://www.kalshiai.org$request_uri;
     }
 }
 EOF

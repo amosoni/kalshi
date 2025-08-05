@@ -39,7 +39,7 @@ module.exports = {
         headers: [
           {
             key: 'Access-Control-Allow-Origin',
-            value: 'https://kalshiai.org',
+            value: 'https://www.kalshiai.org',
           },
           {
             key: 'Access-Control-Allow-Methods',
