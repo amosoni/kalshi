@@ -69,7 +69,7 @@ verification: {
 ### 2. 百度统计代码
 请在 `app/layout.tsx` 中替换百度统计代码：
 ```typescript
-hm.src = "https://hm.baidu.com/hm.js?your-baidu-analytics-code";
+hm.src = 'https://hm.baidu.com/hm.js?your-baidu-analytics-code';
 ```
 
 ### 3. 社交媒体图片
