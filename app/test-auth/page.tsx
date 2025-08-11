@@ -85,7 +85,7 @@ export default function TestAuth() {
           {mode === 'login' ? '登录' : '注册'}
         </button>
       </form>
-      <button onClick={() => setMode(mode === 'login' ? 'register' : 'login')} style={{ width: '100%' }}>
+      <button type="button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')} style={{ width: '100%' }}>
         切换到
         {mode === 'login' ? '注册' : '登录'}
       </button>

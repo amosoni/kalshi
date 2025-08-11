@@ -110,8 +110,8 @@ export default function AIFriendlyContent({ faqs = defaultFAQs }: AIFriendlyCont
       <section className="mt-12">
         <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
         <div className="space-y-6">
-          {faqs.map((faq, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-md p-6">
+          {faqs.map(faq => (
+            <div key={`faq-${faq.question.slice(0, 20)}`} className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-semibold mb-3 text-gray-800">
                 {faq.question}
               </h3>

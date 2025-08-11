@@ -89,7 +89,7 @@ export default function AuthSection() {
               if (loginRes?.ok) {
                 window.location.reload(); // 登录/注册成功后强制刷新页面，确保 session 立即同步
               }
-            } catch (err) {
+            } catch {
               // 可加 setError
             } finally {
               setLoading(false);
@@ -105,7 +105,7 @@ export default function AuthSection() {
               if (loginRes?.ok) {
                 window.location.reload(); // 登录/注册成功后强制刷新页面，确保 session 立即同步
               }
-            } catch (err) {
+            } catch {
               // 可加 setError
             } finally {
               setLoading(false);

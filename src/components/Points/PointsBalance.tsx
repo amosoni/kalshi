@@ -27,6 +27,7 @@ export default function PointsBalance({
       <div className={`flex items-center space-x-2 ${className}`}>
         <span className="text-red-500 text-sm">积分加载失败</span>
         <button
+          type="button"
           onClick={() => refetch()}
           className="text-xs text-blue-600 hover:text-blue-800 underline"
         >

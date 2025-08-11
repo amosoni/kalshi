@@ -88,6 +88,7 @@ export default function DebugPoints() {
 
         <div className="flex space-x-2 mt-4">
           <button
+            type="button"
             onClick={() => refetch()}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
@@ -95,6 +96,7 @@ export default function DebugPoints() {
           </button>
 
           <button
+            type="button"
             onClick={handleGiveBonus}
             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
           >

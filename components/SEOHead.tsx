@@ -1,4 +1,7 @@
 import Head from 'next/head';
+import React from 'react';
+
+const defaultKeywords = ['AI视频背景移除', '视频背景去除', '在线视频编辑', 'AI视频处理'];
 
 type SEOHeadProps = {
   title?: string;
@@ -15,7 +18,7 @@ type SEOHeadProps = {
 export default function SEOHead({
   title = 'Kalshi AI - 免费AI视频背景移除工具',
   description = 'Kalshi AI提供免费的AI视频背景移除服务，支持MP4、MOV、AVI等格式，快速去除视频背景，无需下载软件。',
-  keywords = ['AI视频背景移除', '视频背景去除', '在线视频编辑', 'AI视频处理'],
+  keywords = defaultKeywords,
   image = '/og-image.png',
   url = 'https://www.kalshiai.org',
   type = 'website',
