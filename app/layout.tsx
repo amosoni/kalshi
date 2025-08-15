@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import '../src/styles/global.css';
 
 export const metadata: Metadata = {
@@ -121,30 +122,37 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }),
           }}
         />
-
-        {/* Google Analytics */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-XJZT0K82L6"></script>
-        <script dangerouslySetInnerHTML={{ __html: `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-XJZT0K82L6');
-        ` }}
-        />
-
-        {/* 百度统计 */}
-        <script dangerouslySetInnerHTML={{ __html: `
-          var _hmt = _hmt || [];
-          (function() {
-            var hm = document.createElement("script");
-            hm.src = "https://hm.baidu.com/hm.js?your-baidu-analytics-code";
-            var s = document.getElementsByTagName("script")[0]; 
-            s.parentNode.insertBefore(hm, s);
-          })();
-        ` }}
-        />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+
+        {/* Google Analytics - 使用 next/script 组件 */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-XJZT0K82L6"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-XJZT0K82L6');
+          `}
+        </Script>
+
+        {/* 百度统计 - 使用 next/script 组件 */}
+        <Script id="baidu-analytics" strategy="afterInteractive">
+          {`
+            var _hmt = _hmt || [];
+            (function() {
+              var hm = document.createElement("script");
+              hm.src = "https://hm.baidu.com/hm.js?your-baidu-analytics-code";
+              var s = document.getElementsByTagName("script")[0]; 
+              s.parentNode.insertBefore(hm, s);
+            })();
+          `}
+        </Script>
+      </body>
     </html>
   );
 }

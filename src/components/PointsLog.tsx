@@ -12,7 +12,7 @@ export default function PointsLog({ className = '', limit = 50 }: PointsLogProps
     return (
       <div className={`space-y-4 ${className}`}>
         {Array.from({ length: 3 }).fill(null).map((_, i) => (
-          <div key={`skeleton-${i}-${Date.now()}`} className="animate-pulse">
+          <div key={`points-skeleton-${String.fromCharCode(97 + i)}`} className="animate-pulse">
             <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
             <div className="h-3 bg-gray-200 rounded w-1/2"></div>
           </div>

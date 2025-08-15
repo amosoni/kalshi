@@ -32,13 +32,13 @@ export const metadata: Metadata = {
 export default function RootLayout(_props: any) {
   const { locale } = _props.params;
 
-  // Only support English for now
-  if (locale !== 'en') {
+  // 支持英文和默认语言，避免重定向问题
+  if (locale && locale !== 'en') {
     notFound();
   }
 
   return (
-    <html lang={locale}>
+    <html lang={locale || 'en'}>
       <body>
         {/* <PostHogProvider> */}
         {_props.children}

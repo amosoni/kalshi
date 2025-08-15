@@ -93,7 +93,7 @@ export default function TestimonialsSection() {
                     <div className="flex items-center mt-4">
                       {[...Array.from({ length: 5 })].map((_, i) => (
                         <svg
-                          key={`star-${testimonial.id}-${i}`}
+                          key={`star-${testimonial.id}-${String.fromCharCode(97 + i)}-${testimonial.name}`}
                           className="w-4 h-4 text-yellow-400 fill-current"
                           viewBox="0 0 20 20"
                         >

@@ -39,73 +39,6 @@ const defaultFAQs: FAQItem[] = [
 export default function AIFriendlyContent({ faqs = defaultFAQs }: AIFriendlyContentProps) {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* 结构化FAQ数据 */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            'mainEntity': faqs.map(faq => ({
-              '@type': 'Question',
-              'name': faq.question,
-              'acceptedAnswer': {
-                '@type': 'Answer',
-                'text': faq.answer,
-              },
-            })),
-          }),
-        }}
-      />
-
-      {/* 网站信息结构化数据 */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Organization',
-            'name': 'Kalshi AI',
-            'url': 'https://www.kalshiai.org',
-            'logo': 'https://www.kalshiai.org/logo.png',
-            'description': 'Kalshi AI provides free AI video background removal service',
-            'sameAs': [
-              'https://twitter.com/kalshiai',
-              'https://github.com/kalshiai',
-            ],
-            'contactPoint': {
-              '@type': 'ContactPoint',
-              'contactType': 'customer service',
-              'availableLanguage': ['English', 'Chinese'],
-            },
-          }),
-        }}
-      />
-
-      {/* 服务结构化数据 */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Service',
-            'name': 'AI Video Background Removal',
-            'description': 'Use AI technology to quickly remove video backgrounds, supporting multiple video formats',
-            'provider': {
-              '@type': 'Organization',
-              'name': 'Kalshi AI',
-            },
-            'areaServed': 'Worldwide',
-            'serviceType': 'Video Editing',
-            'offers': {
-              '@type': 'Offer',
-              'price': '0',
-              'priceCurrency': 'USD',
-            },
-          }),
-        }}
-      />
-
       {/* 可见的FAQ内容 */}
       <section className="mt-12">
         <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
@@ -137,12 +70,36 @@ export default function AIFriendlyContent({ faqs = defaultFAQs }: AIFriendlyCont
           </div>
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-xl font-semibold mb-3">Online Processing</h3>
-            <p className="text-gray-600">No software download required, process videos directly in your browser</p>
+            <p className="text-gray-600">No need to download software, process videos directly in the browser</p>
           </div>
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold mb-3">Free to Use</h3>
-            <p className="text-gray-600">Completely free, no registration required to use all features</p>
+            <h3 className="text-xl font-semibold mb-3">Fast Processing</h3>
+            <p className="text-gray-600">AI processing is fast, usually completed within a few minutes</p>
           </div>
+        </div>
+      </section>
+
+      {/* 使用说明 */}
+      <section className="mt-12">
+        <h2 className="text-3xl font-bold text-center mb-8">How to Use</h2>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <ol className="list-decimal list-inside space-y-3 text-gray-600">
+            <li>Upload your video file (MP4, MOV, AVI format, max 100MB)</li>
+            <li>Wait for AI to process and remove the background</li>
+            <li>Download the processed video with transparent background</li>
+          </ol>
+        </div>
+      </section>
+
+      {/* 技术说明 */}
+      <section className="mt-12">
+        <h2 className="text-3xl font-bold text-center mb-8">Technical Details</h2>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <p className="text-gray-600 leading-relaxed">
+            Our AI video background removal technology uses advanced machine learning algorithms to accurately identify
+            and separate foreground objects from background elements. The system supports multiple video formats and
+            can handle various lighting conditions and complex backgrounds.
+          </p>
         </div>
       </section>
     </div>

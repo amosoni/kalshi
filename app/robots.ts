@@ -1,10 +1,8 @@
 import type { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL
-    || process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : 'https://www.kalshiai.org';
+  // 始终使用生产域名，避免vercel.app域名出现在robots中
+  const baseUrl = 'https://www.kalshiai.org';
 
   return {
     rules: [

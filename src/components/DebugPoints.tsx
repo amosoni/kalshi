@@ -1,14 +1,15 @@
+import { useState } from 'react';
 import { usePoints } from '../hooks/usePoints';
 import { useUser } from '../hooks/useUser';
-import { apiUrl } from '../utils/api';
 
 export default function DebugPoints() {
   const user = useUser();
   const { points, loading, error, refetch } = usePoints();
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const handleGiveBonus = async () => {
     try {
-      const response = await fetch(apiUrl('/api/points/bonus'), {
+      const response = await fetch('/api/points/bonus', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -17,19 +18,36 @@ export default function DebugPoints() {
       const data = await response.json();
 
       if (response.ok) {
-        alert(`成功发放积分！新余额: ${data.newBalance}`);
+        setNotification({ type: 'success', message: `成功发放积分！新余额: ${data.newBalance}` });
         refetch(); // 刷新积分数据
       } else {
-        alert(`发放失败: ${data.error}`);
+        setNotification({ type: 'error', message: `发放失败: ${data.error}` });
       }
     } catch (err) {
-      alert(`请求失败: ${err}`);
+      setNotification({ type: 'error', message: `请求失败: ${err}` });
     }
   };
 
   return (
     <div className="p-4 bg-gray-100 rounded-lg">
       <h3 className="text-lg font-bold mb-4">积分系统调试</h3>
+
+      {/* 通知显示 */}
+      {notification && (
+        <div className={`mb-4 p-3 rounded ${
+          notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        }`}
+        >
+          {notification.message}
+          <button
+            type="button"
+            onClick={() => setNotification(null)}
+            className="ml-2 text-sm underline"
+          >
+            关闭
+          </button>
+        </div>
+      )}
 
       <div className="space-y-2">
         <div>
