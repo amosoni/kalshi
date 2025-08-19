@@ -7,7 +7,7 @@ export async function OPTIONS() {
   return new Response(null, {
     status: 204,
     headers: {
-      'Access-Control-Allow-Origin': 'https://www.kalshiai.org',
+      'Access-Control-Allow-Origin': 'https://kalshiai.org',
       'Access-Control-Allow-Methods': 'POST,OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Allow-Credentials': 'true',
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const { username, email, password } = await req.json();
     if (!username || !email || !password) {
       const res = NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-      res.headers.set('Access-Control-Allow-Origin', 'https://www.kalshiai.org');
+      res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
       res.headers.set('Access-Control-Allow-Credentials', 'true');
       return res;
     }
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     });
     if (exist) {
       const res = NextResponse.json({ error: 'User already exists' }, { status: 400 });
-      res.headers.set('Access-Control-Allow-Origin', 'https://www.kalshiai.org');
+      res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
       res.headers.set('Access-Control-Allow-Credentials', 'true');
       return res;
     }
@@ -54,12 +54,12 @@ export async function POST(req: NextRequest) {
       },
     });
     const res = NextResponse.json({ success: true, user: { id: user.id, username, email } }, { status: 201 });
-    res.headers.set('Access-Control-Allow-Origin', 'https://www.kalshiai.org');
+    res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
     res.headers.set('Access-Control-Allow-Credentials', 'true');
     return res;
   } catch (err: any) {
     const res = NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
-    res.headers.set('Access-Control-Allow-Origin', 'https://www.kalshiai.org');
+    res.headers.set('Access-Control-Allow-Origin', 'https://kalshiai.org');
     res.headers.set('Access-Control-Allow-Credentials', 'true');
     return res;
   }
